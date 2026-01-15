@@ -1,0 +1,188 @@
+{
+  "timestamp": "2026-01-15T18:05:22.773792",
+  "settings": {
+    "n_authors": 29,
+    "n_per_author": 200,
+    "embedding_model": "gemini",
+    "n_folds": 5,
+    "seed": 42,
+    "chance_level": 0.034482758620689655
+  },
+  "poem_length_stats": {
+    "mean": 100.38775862068965,
+    "median": 81.0,
+    "std": 82.54794942090875,
+    "min": 4,
+    "max": 1525,
+    "q25": 56.0,
+    "q75": 116.0,
+    "eder_minimum": 3000,
+    "poems_meeting_eder": 0
+  },
+  "experiments": {
+    "embeddings": [
+      {
+        "concat_size": 1,
+        "n_samples": 5800,
+        "samples_per_author": 200,
+        "mean_words": 100.38775862068965,
+        "accuracy": 0.6132758620689656,
+        "accuracy_std": 0.012828327750164346,
+        "lift": 17.785,
+        "fold_scores": [
+          0.6155172413793103,
+          0.6120689655172413,
+          0.6232758620689656,
+          0.5896551724137931,
+          0.6258620689655172
+        ]
+      },
+      {
+        "concat_size": 5,
+        "n_samples": 1160,
+        "samples_per_author": 40,
+        "mean_words": 501.9387931034483,
+        "accuracy": 0.953448275862069,
+        "accuracy_std": 0.014781403620243327,
+        "lift": 27.650000000000002,
+        "fold_scores": [
+          0.9655172413793104,
+          0.9396551724137931,
+          0.9741379310344828,
+          0.9525862068965517,
+          0.9353448275862069
+        ]
+      },
+      {
+        "concat_size": 10,
+        "n_samples": 580,
+        "samples_per_author": 20,
+        "mean_words": 1003.8775862068966,
+        "accuracy": 0.9913793103448276,
+        "accuracy_std": 0.010904405724718553,
+        "lift": 28.75,
+        "fold_scores": [
+          0.9827586206896551,
+          1.0,
+          0.9741379310344828,
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "concat_size": 20,
+        "n_samples": 290,
+        "samples_per_author": 10,
+        "mean_words": 2007.7551724137932,
+        "accuracy": 0.9965517241379309,
+        "accuracy_std": 0.006896551724137945,
+        "lift": 28.9,
+        "fold_scores": [
+          0.9827586206896551,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "concat_size": 40,
+        "n_samples": 145,
+        "samples_per_author": 5,
+        "mean_words": 4015.5103448275863,
+        "accuracy": 1.0,
+        "accuracy_std": 0.0,
+        "lift": 29.0,
+        "fold_scores": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    ],
+    "stylometry": [
+      {
+        "concat_size": 1,
+        "n_samples": 5800,
+        "samples_per_author": 200,
+        "mean_words": 100.38775862068965,
+        "accuracy": 0.5775862068965518,
+        "accuracy_std": 0.015584146949622998,
+        "lift": 16.750000000000004,
+        "fold_scores": [
+          0.5827586206896552,
+          0.5646551724137931,
+          0.5732758620689655,
+          0.5620689655172414,
+          0.6051724137931035
+        ]
+      },
+      {
+        "concat_size": 5,
+        "n_samples": 1160,
+        "samples_per_author": 40,
+        "mean_words": 501.9387931034483,
+        "accuracy": 0.9620689655172413,
+        "accuracy_std": 0.014269780480385194,
+        "lift": 27.9,
+        "fold_scores": [
+          0.9870689655172413,
+          0.9612068965517241,
+          0.9655172413793104,
+          0.9482758620689655,
+          0.9482758620689655
+        ]
+      },
+      {
+        "concat_size": 10,
+        "n_samples": 580,
+        "samples_per_author": 20,
+        "mean_words": 1003.8775862068966,
+        "accuracy": 0.9948275862068965,
+        "accuracy_std": 0.004223258177212357,
+        "lift": 28.849999999999998,
+        "fold_scores": [
+          1.0,
+          0.9913793103448276,
+          1.0,
+          0.9913793103448276,
+          0.9913793103448276
+        ]
+      },
+      {
+        "concat_size": 20,
+        "n_samples": 290,
+        "samples_per_author": 10,
+        "mean_words": 2007.7551724137932,
+        "accuracy": 1.0,
+        "accuracy_std": 0.0,
+        "lift": 29.0,
+        "fold_scores": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "concat_size": 40,
+        "n_samples": 145,
+        "samples_per_author": 5,
+        "mean_words": 4015.5103448275863,
+        "accuracy": 1.0,
+        "accuracy_std": 0.0,
+        "lift": 29.0,
+        "fold_scores": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    ]
+  }
+}

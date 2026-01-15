@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-01-15T18:01:06.307178",
+  "language": "russian",
+  "settings": {
+    "n_authors": 29,
+    "n_samples": 5800,
+    "n_per_author": 200,
+    "cv_folds": 5,
+    "seed": 42,
+    "chance_level": 0.034482758620689655
+  },
+  "methods": {
+    "char_ngrams_2_4": {
+      "accuracy": 0.583103448275862,
+      "std": 0.01339512041348625,
+      "features": 2000
+    },
+    "char_ngrams_3": {
+      "accuracy": 0.5775862068965518,
+      "std": 0.015584146949622998,
+      "features": 2000
+    },
+    "mfw_100_logreg": {
+      "accuracy": 0.19189655172413794,
+      "std": 0.012688530684809723,
+      "features": 100
+    },
+    "burrows_delta_100": {
+      "accuracy": 0.1303448275862069,
+      "std": 0.012473515343231666,
+      "features": 100
+    },
+    "burrows_delta_500": {
+      "accuracy": 0.06982758620689655,
+      "std": 0.004223258177212374,
+      "features": 500
+    },
+    "cosine_delta_100": {
+      "accuracy": 0.19,
+      "std": 0.0055761936651021506,
+      "features": 100
+    },
+    "function_words": {
+      "accuracy": 0.1617241379310345,
+      "std": 0.00568181277699451,
+      "features": 127
+    },
+    "word_ngrams_1_2": {
+      "accuracy": 0.3379310344827586,
+      "std": 0.005795771142748835,
+      "features": 2000
+    },
+    "combined_char3_func": {
+      "accuracy": 0.5918965517241379,
+      "std": 0.012416187508544008,
+      "features": 2127
+    },
+    "full_combined": {
+      "accuracy": 0.6168965517241379,
+      "std": 0.011047944374897065,
+      "features": 4127
+    }
+  },
+  "best_method": "full_combined",
+  "best_accuracy": 0.6168965517241379
+}

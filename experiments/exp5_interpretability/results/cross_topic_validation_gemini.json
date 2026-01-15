@@ -1,0 +1,752 @@
+{
+  "timestamp": "2026-01-15T18:18:37.217702",
+  "settings": {
+    "n_authors": 29,
+    "n_samples": 5800,
+    "n_topics": 20,
+    "embedding_model": "gemini",
+    "topic_threshold": 0.25,
+    "n_poems_with_topic": 5800
+  },
+  "topic_words": {
+    "0": [
+      "это",
+      "сойти",
+      "вечер",
+      "конь",
+      "скучный"
+    ],
+    "1": [
+      "болото",
+      "легкий",
+      "лес",
+      "можно",
+      "пыль"
+    ],
+    "2": [
+      "плащ",
+      "мудрый",
+      "ждать",
+      "бросить",
+      "губа"
+    ],
+    "3": [
+      "площадь",
+      "нить",
+      "красота",
+      "печаль",
+      "память"
+    ],
+    "4": [
+      "видать",
+      "век",
+      "надо",
+      "год",
+      "желать"
+    ],
+    "5": [
+      "час",
+      "смертный",
+      "звездный",
+      "людской",
+      "миг"
+    ],
+    "6": [
+      "господь",
+      "кровь",
+      "знамя",
+      "муза",
+      "это"
+    ],
+    "7": [
+      "ночь",
+      "небо",
+      "день",
+      "белый",
+      "ветер"
+    ],
+    "8": [
+      "душа",
+      "сердце",
+      "любовь",
+      "любить",
+      "день"
+    ],
+    "9": [
+      "оттого",
+      "сейчас",
+      "разве",
+      "весна",
+      "можно"
+    ],
+    "10": [
+      "огонь",
+      "царица",
+      "край",
+      "могила",
+      "память"
+    ],
+    "11": [
+      "целовать",
+      "девушка",
+      "отец",
+      "оба",
+      "один"
+    ],
+    "12": [
+      "помочь",
+      "ползти",
+      "вокруг",
+      "радость",
+      "восторг"
+    ],
+    "13": [
+      "столица",
+      "свобода",
+      "навстречу",
+      "смерть",
+      "сила"
+    ],
+    "14": [
+      "речь",
+      "поэт",
+      "хороший",
+      "грех",
+      "никто"
+    ],
+    "15": [
+      "твердь",
+      "целый",
+      "площадь",
+      "слово",
+      "народ"
+    ],
+    "16": [
+      "береза",
+      "стук",
+      "едва",
+      "жизнь",
+      "россия"
+    ],
+    "17": [
+      "писать",
+      "слух",
+      "дух",
+      "увы",
+      "падать"
+    ],
+    "18": [
+      "смертный",
+      "женщина",
+      "печальный",
+      "стоять",
+      "вставать"
+    ],
+    "19": [
+      "желать",
+      "видно",
+      "небо",
+      "иль",
+      "ответ"
+    ]
+  },
+  "experiments": {
+    "baseline": {
+      "accuracy": 0.6132758620689656,
+      "accuracy_std": 0.012828327750164346,
+      "fold_scores": [
+        0.6155172413793103,
+        0.6120689655172413,
+        0.6232758620689656,
+        0.5896551724137931,
+        0.6258620689655172
+      ],
+      "chance": 0.034482758620689655,
+      "lift": 17.785
+    },
+    "leave_one_topic_out": {
+      "results": [
+        {
+          "held_out_topic": 5,
+          "n_authors": 5,
+          "n_train": 943,
+          "n_test": 57,
+          "accuracy": 0.9649122807017544,
+          "chance": 0.2,
+          "lift": 4.824561403508771
+        },
+        {
+          "held_out_topic": 6,
+          "n_authors": 19,
+          "n_train": 3749,
+          "n_test": 51,
+          "accuracy": 0.3333333333333333,
+          "chance": 0.05263157894736842,
+          "lift": 6.333333333333333
+        },
+        {
+          "held_out_topic": 7,
+          "n_authors": 29,
+          "n_train": 3390,
+          "n_test": 2410,
+          "accuracy": 0.4995850622406639,
+          "chance": 0.034482758620689655,
+          "lift": 14.487966804979253
+        },
+        {
+          "held_out_topic": 8,
+          "n_authors": 29,
+          "n_train": 2679,
+          "n_test": 3121,
+          "accuracy": 0.46972124319128483,
+          "chance": 0.034482758620689655,
+          "lift": 13.62191605254726
+        },
+        {
+          "held_out_topic": 14,
+          "n_authors": 13,
+          "n_train": 2579,
+          "n_test": 21,
+          "accuracy": 0.5238095238095238,
+          "chance": 0.07692307692307693,
+          "lift": 6.809523809523809
+        }
+      ],
+      "mean_accuracy": 0.558272288655312,
+      "std_accuracy": 0.21374132829694228,
+      "drop_from_baseline": 0.055003573413653584
+    },
+    "within_topic": {
+      "results": [
+        {
+          "topic": 7,
+          "n_authors": 29,
+          "n_samples": 2410,
+          "accuracy": 0.5659751037344398,
+          "accuracy_std": 0.013471106291077149,
+          "chance": 0.034482758620689655,
+          "lift": 16.413278008298754
+        },
+        {
+          "topic": 8,
+          "n_authors": 29,
+          "n_samples": 3121,
+          "accuracy": 0.5469441025641025,
+          "accuracy_std": 0.00986163278486034,
+          "chance": 0.034482758620689655,
+          "lift": 15.861378974358974
+        }
+      ],
+      "mean_accuracy": 0.5564596031492712,
+      "std_accuracy": 0.009515500585168646,
+      "weighted_accuracy": 0.5552364028390099
+    },
+    "cross_topic_pairs": {
+      "results": [
+        {
+          "train_topic": 0,
+          "test_topic": 6,
+          "n_common_authors": 8,
+          "n_train": 14,
+          "n_test": 33,
+          "accuracy": 0.30303030303030304,
+          "chance": 0.125,
+          "lift": 2.4242424242424243
+        },
+        {
+          "train_topic": 0,
+          "test_topic": 7,
+          "n_common_authors": 10,
+          "n_train": 16,
+          "n_test": 703,
+          "accuracy": 0.10953058321479374,
+          "chance": 0.1,
+          "lift": 1.0953058321479374
+        },
+        {
+          "train_topic": 0,
+          "test_topic": 8,
+          "n_common_authors": 10,
+          "n_train": 16,
+          "n_test": 1147,
+          "accuracy": 0.14734088927637315,
+          "chance": 0.1,
+          "lift": 1.4734088927637314
+        },
+        {
+          "train_topic": 0,
+          "test_topic": 9,
+          "n_common_authors": 8,
+          "n_train": 13,
+          "n_test": 14,
+          "accuracy": 0.21428571428571427,
+          "chance": 0.125,
+          "lift": 1.7142857142857142
+        },
+        {
+          "train_topic": 2,
+          "test_topic": 6,
+          "n_common_authors": 6,
+          "n_train": 11,
+          "n_test": 30,
+          "accuracy": 0.23333333333333334,
+          "chance": 0.16666666666666666,
+          "lift": 1.4000000000000001
+        },
+        {
+          "train_topic": 2,
+          "test_topic": 7,
+          "n_common_authors": 7,
+          "n_train": 12,
+          "n_test": 523,
+          "accuracy": 0.1988527724665392,
+          "chance": 0.14285714285714285,
+          "lift": 1.3919694072657744
+        },
+        {
+          "train_topic": 2,
+          "test_topic": 8,
+          "n_common_authors": 7,
+          "n_train": 12,
+          "n_test": 754,
+          "accuracy": 0.19496021220159152,
+          "chance": 0.14285714285714285,
+          "lift": 1.3647214854111407
+        },
+        {
+          "train_topic": 3,
+          "test_topic": 7,
+          "n_common_authors": 6,
+          "n_train": 10,
+          "n_test": 506,
+          "accuracy": 0.1383399209486166,
+          "chance": 0.16666666666666666,
+          "lift": 0.8300395256916997
+        },
+        {
+          "train_topic": 3,
+          "test_topic": 8,
+          "n_common_authors": 6,
+          "n_train": 10,
+          "n_test": 596,
+          "accuracy": 0.20134228187919462,
+          "chance": 0.16666666666666666,
+          "lift": 1.2080536912751678
+        },
+        {
+          "train_topic": 5,
+          "test_topic": 7,
+          "n_common_authors": 5,
+          "n_train": 57,
+          "n_test": 378,
+          "accuracy": 0.20105820105820105,
+          "chance": 0.2,
+          "lift": 1.0052910052910051
+        },
+        {
+          "train_topic": 5,
+          "test_topic": 8,
+          "n_common_authors": 5,
+          "n_train": 57,
+          "n_test": 486,
+          "accuracy": 0.1522633744855967,
+          "chance": 0.2,
+          "lift": 0.7613168724279835
+        },
+        {
+          "train_topic": 6,
+          "test_topic": 0,
+          "n_common_authors": 8,
+          "n_train": 33,
+          "n_test": 14,
+          "accuracy": 0.35714285714285715,
+          "chance": 0.125,
+          "lift": 2.857142857142857
+        },
+        {
+          "train_topic": 6,
+          "test_topic": 2,
+          "n_common_authors": 6,
+          "n_train": 30,
+          "n_test": 11,
+          "accuracy": 0.36363636363636365,
+          "chance": 0.16666666666666666,
+          "lift": 2.181818181818182
+        },
+        {
+          "train_topic": 6,
+          "test_topic": 7,
+          "n_common_authors": 19,
+          "n_train": 51,
+          "n_test": 1395,
+          "accuracy": 0.08458781362007169,
+          "chance": 0.05263157894736842,
+          "lift": 1.6071684587813622
+        },
+        {
+          "train_topic": 6,
+          "test_topic": 8,
+          "n_common_authors": 19,
+          "n_train": 51,
+          "n_test": 2213,
+          "accuracy": 0.07817442385901491,
+          "chance": 0.05263157894736842,
+          "lift": 1.4853140533212834
+        },
+        {
+          "train_topic": 6,
+          "test_topic": 9,
+          "n_common_authors": 10,
+          "n_train": 40,
+          "n_test": 16,
+          "accuracy": 0.125,
+          "chance": 0.1,
+          "lift": 1.25
+        },
+        {
+          "train_topic": 6,
+          "test_topic": 14,
+          "n_common_authors": 11,
+          "n_train": 33,
+          "n_test": 18,
+          "accuracy": 0.16666666666666666,
+          "chance": 0.09090909090909091,
+          "lift": 1.8333333333333333
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 0,
+          "n_common_authors": 10,
+          "n_train": 703,
+          "n_test": 16,
+          "accuracy": 0.4375,
+          "chance": 0.1,
+          "lift": 4.375
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 2,
+          "n_common_authors": 7,
+          "n_train": 523,
+          "n_test": 12,
+          "accuracy": 0.4166666666666667,
+          "chance": 0.14285714285714285,
+          "lift": 2.916666666666667
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 3,
+          "n_common_authors": 6,
+          "n_train": 506,
+          "n_test": 10,
+          "accuracy": 0.8,
+          "chance": 0.16666666666666666,
+          "lift": 4.800000000000001
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 5,
+          "n_common_authors": 5,
+          "n_train": 378,
+          "n_test": 57,
+          "accuracy": 0.9122807017543859,
+          "chance": 0.2,
+          "lift": 4.561403508771929
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 6,
+          "n_common_authors": 19,
+          "n_train": 1395,
+          "n_test": 51,
+          "accuracy": 0.3333333333333333,
+          "chance": 0.05263157894736842,
+          "lift": 6.333333333333333
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 8,
+          "n_common_authors": 29,
+          "n_train": 2410,
+          "n_test": 3121,
+          "accuracy": 0.468439602691445,
+          "chance": 0.034482758620689655,
+          "lift": 13.584748478051905
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 9,
+          "n_common_authors": 12,
+          "n_train": 942,
+          "n_test": 18,
+          "accuracy": 0.6666666666666666,
+          "chance": 0.08333333333333333,
+          "lift": 8.0
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 10,
+          "n_common_authors": 7,
+          "n_train": 610,
+          "n_test": 10,
+          "accuracy": 0.7,
+          "chance": 0.14285714285714285,
+          "lift": 4.9
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 14,
+          "n_common_authors": 13,
+          "n_train": 965,
+          "n_test": 21,
+          "accuracy": 0.38095238095238093,
+          "chance": 0.07692307692307693,
+          "lift": 4.952380952380952
+        },
+        {
+          "train_topic": 7,
+          "test_topic": 15,
+          "n_common_authors": 7,
+          "n_train": 546,
+          "n_test": 10,
+          "accuracy": 0.8,
+          "chance": 0.14285714285714285,
+          "lift": 5.6000000000000005
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 0,
+          "n_common_authors": 10,
+          "n_train": 1147,
+          "n_test": 16,
+          "accuracy": 0.375,
+          "chance": 0.1,
+          "lift": 3.75
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 2,
+          "n_common_authors": 7,
+          "n_train": 754,
+          "n_test": 12,
+          "accuracy": 0.5,
+          "chance": 0.14285714285714285,
+          "lift": 3.5
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 3,
+          "n_common_authors": 6,
+          "n_train": 596,
+          "n_test": 10,
+          "accuracy": 0.6,
+          "chance": 0.16666666666666666,
+          "lift": 3.6
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 5,
+          "n_common_authors": 5,
+          "n_train": 486,
+          "n_test": 57,
+          "accuracy": 0.9824561403508771,
+          "chance": 0.2,
+          "lift": 4.912280701754385
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 6,
+          "n_common_authors": 19,
+          "n_train": 2213,
+          "n_test": 51,
+          "accuracy": 0.27450980392156865,
+          "chance": 0.05263157894736842,
+          "lift": 5.215686274509805
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 7,
+          "n_common_authors": 29,
+          "n_train": 3121,
+          "n_test": 2410,
+          "accuracy": 0.4879668049792531,
+          "chance": 0.034482758620689655,
+          "lift": 14.15103734439834
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 9,
+          "n_common_authors": 12,
+          "n_train": 1295,
+          "n_test": 18,
+          "accuracy": 0.6111111111111112,
+          "chance": 0.08333333333333333,
+          "lift": 7.333333333333334
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 10,
+          "n_common_authors": 7,
+          "n_train": 674,
+          "n_test": 10,
+          "accuracy": 0.8,
+          "chance": 0.14285714285714285,
+          "lift": 5.6000000000000005
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 14,
+          "n_common_authors": 13,
+          "n_train": 1495,
+          "n_test": 21,
+          "accuracy": 0.42857142857142855,
+          "chance": 0.07692307692307693,
+          "lift": 5.571428571428571
+        },
+        {
+          "train_topic": 8,
+          "test_topic": 15,
+          "n_common_authors": 7,
+          "n_train": 744,
+          "n_test": 10,
+          "accuracy": 0.6,
+          "chance": 0.14285714285714285,
+          "lift": 4.2
+        },
+        {
+          "train_topic": 9,
+          "test_topic": 0,
+          "n_common_authors": 8,
+          "n_train": 14,
+          "n_test": 13,
+          "accuracy": 0.23076923076923078,
+          "chance": 0.125,
+          "lift": 1.8461538461538463
+        },
+        {
+          "train_topic": 9,
+          "test_topic": 6,
+          "n_common_authors": 10,
+          "n_train": 16,
+          "n_test": 40,
+          "accuracy": 0.25,
+          "chance": 0.1,
+          "lift": 2.5
+        },
+        {
+          "train_topic": 9,
+          "test_topic": 7,
+          "n_common_authors": 12,
+          "n_train": 18,
+          "n_test": 942,
+          "accuracy": 0.1040339702760085,
+          "chance": 0.08333333333333333,
+          "lift": 1.248407643312102
+        },
+        {
+          "train_topic": 9,
+          "test_topic": 8,
+          "n_common_authors": 12,
+          "n_train": 18,
+          "n_test": 1295,
+          "accuracy": 0.14285714285714285,
+          "chance": 0.08333333333333333,
+          "lift": 1.7142857142857142
+        },
+        {
+          "train_topic": 9,
+          "test_topic": 14,
+          "n_common_authors": 6,
+          "n_train": 11,
+          "n_test": 12,
+          "accuracy": 0.4166666666666667,
+          "chance": 0.16666666666666666,
+          "lift": 2.5000000000000004
+        },
+        {
+          "train_topic": 10,
+          "test_topic": 7,
+          "n_common_authors": 7,
+          "n_train": 10,
+          "n_test": 610,
+          "accuracy": 0.17540983606557378,
+          "chance": 0.14285714285714285,
+          "lift": 1.2278688524590164
+        },
+        {
+          "train_topic": 10,
+          "test_topic": 8,
+          "n_common_authors": 7,
+          "n_train": 10,
+          "n_test": 674,
+          "accuracy": 0.21216617210682492,
+          "chance": 0.14285714285714285,
+          "lift": 1.4851632047477745
+        },
+        {
+          "train_topic": 14,
+          "test_topic": 6,
+          "n_common_authors": 11,
+          "n_train": 18,
+          "n_test": 33,
+          "accuracy": 0.30303030303030304,
+          "chance": 0.09090909090909091,
+          "lift": 3.3333333333333335
+        },
+        {
+          "train_topic": 14,
+          "test_topic": 7,
+          "n_common_authors": 13,
+          "n_train": 21,
+          "n_test": 965,
+          "accuracy": 0.07772020725388601,
+          "chance": 0.07692307692307693,
+          "lift": 1.010362694300518
+        },
+        {
+          "train_topic": 14,
+          "test_topic": 8,
+          "n_common_authors": 13,
+          "n_train": 21,
+          "n_test": 1495,
+          "accuracy": 0.12642140468227425,
+          "chance": 0.07692307692307693,
+          "lift": 1.6434782608695653
+        },
+        {
+          "train_topic": 14,
+          "test_topic": 9,
+          "n_common_authors": 6,
+          "n_train": 12,
+          "n_test": 11,
+          "accuracy": 0.45454545454545453,
+          "chance": 0.16666666666666666,
+          "lift": 2.7272727272727275
+        },
+        {
+          "train_topic": 15,
+          "test_topic": 7,
+          "n_common_authors": 7,
+          "n_train": 10,
+          "n_test": 546,
+          "accuracy": 0.30036630036630035,
+          "chance": 0.14285714285714285,
+          "lift": 2.1025641025641026
+        },
+        {
+          "train_topic": 15,
+          "test_topic": 8,
+          "n_common_authors": 7,
+          "n_train": 10,
+          "n_test": 744,
+          "accuracy": 0.1935483870967742,
+          "chance": 0.14285714285714285,
+          "lift": 1.3548387096774195
+        }
+      ],
+      "mean_accuracy": 0.3566507085564158,
+      "std_accuracy": 0.23244582774007283,
+      "drop_from_baseline": 0.2566251535125498
+    }
+  }
+}

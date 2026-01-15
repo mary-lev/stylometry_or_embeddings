@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-01-15T18:19:41.081884",
+  "language": "russian",
+  "settings": {
+    "n_authors": 29,
+    "n_samples": 5800,
+    "n_per_author": 200,
+    "cv_folds": 5,
+    "seed": 42,
+    "chance_level": 0.034482758620689655,
+    "embedding_model": "gemini",
+    "stylometry_features": 2127,
+    "embedding_features": 3072,
+    "combined_features": 5199
+  },
+  "multiclass": {
+    "embeddings": {
+      "accuracy": 0.6132758620689656,
+      "std": 0.012828327750164346
+    },
+    "stylometry": {
+      "accuracy": 0.5917241379310345,
+      "std": 0.011586412149249272
+    },
+    "combined": {
+      "accuracy": 0.705344827586207,
+      "std": 0.01008878540574331
+    }
+  },
+  "pairwise": {}
+}

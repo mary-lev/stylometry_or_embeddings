@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-01-15T18:21:38.929127",
+  "language": "italian",
+  "settings": {
+    "n_authors": 52,
+    "n_samples": 10400,
+    "n_per_author": 200,
+    "cv_folds": 5,
+    "seed": 42,
+    "chance_level": 0.019230769230769232,
+    "embedding_model": "gemini",
+    "stylometry_features": 2213,
+    "embedding_features": 3072,
+    "combined_features": 5285
+  },
+  "multiclass": {
+    "embeddings": {
+      "accuracy": 0.6711538461538462,
+      "std": 0.00483645243844591
+    },
+    "stylometry": {
+      "accuracy": 0.7966346153846154,
+      "std": 0.013306108176055813
+    },
+    "combined": {
+      "accuracy": 0.8179807692307692,
+      "std": 0.011049746308903385
+    }
+  },
+  "pairwise": {}
+}

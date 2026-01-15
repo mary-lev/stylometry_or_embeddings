@@ -1,0 +1,118 @@
+{
+  "timestamp": "2026-01-15T18:16:49.601349",
+  "settings": {
+    "n_authors": 29,
+    "n_per_author": 200,
+    "total_samples": 5800,
+    "embedding_model": "gemini",
+    "embedding_dim": 3072,
+    "seed": 42
+  },
+  "probes": {
+    "meter_iamb_vs_trochee": {
+      "accuracy": 0.6512946298692831,
+      "accuracy_std": 0.01718910873029763,
+      "n_samples": 2234,
+      "n_class_0": 2909,
+      "n_class_1": 1117,
+      "class_labels": [
+        "0",
+        "1"
+      ]
+    },
+    "meter_binary_vs_ternary": {
+      "accuracy": 0.6125276979239176,
+      "accuracy_std": 0.01618612309267038,
+      "n_samples": 3066,
+      "n_class_0": 4098,
+      "n_class_1": 1533,
+      "class_labels": [
+        "Binary (Я/Х)",
+        "Ternary (Ан/Аф/Д)"
+      ]
+    },
+    "meter_5class": {
+      "accuracy": 0.32811594202898553,
+      "accuracy_std": 0.030587608019183574,
+      "n_samples": 1725,
+      "n_classes": 5,
+      "n_per_class": 345,
+      "chance_level": 0.2,
+      "class_counts": {
+        "Аф": 478,
+        "Х": 1160,
+        "Я": 2938,
+        "Ан": 710,
+        "Д": 345
+      },
+      "class_names": {
+        "Я": "Iamb",
+        "Х": "Trochee",
+        "Д": "Dactyl",
+        "Ан": "Anapest",
+        "Аф": "Amphibrach"
+      }
+    },
+    "clausula_regular_vs_free": {
+      "accuracy": 0.5619687277896233,
+      "accuracy_std": 0.018204138870962148,
+      "n_samples": 1678,
+      "n_class_0": 3926,
+      "n_class_1": 839,
+      "class_labels": [
+        "0",
+        "1"
+      ]
+    },
+    "feet_4_vs_5": {
+      "accuracy": 0.6329920442753373,
+      "accuracy_std": 0.025668641539537438,
+      "n_samples": 1474,
+      "n_class_0": 2056,
+      "n_class_1": 737,
+      "class_labels": [
+        "0",
+        "1"
+      ]
+    },
+    "rhyme_cross_vs_paired": {
+      "accuracy": 0.6096644701961675,
+      "accuracy_std": 0.02566913837562853,
+      "n_samples": 812,
+      "n_class_0": 3503,
+      "n_class_1": 406,
+      "class_labels": [
+        "0",
+        "1"
+      ]
+    },
+    "topic_lda": {
+      "accuracy": 0.8131561461794019,
+      "accuracy_std": 0.007273324583426777,
+      "n_samples": 3222,
+      "n_class_0": 3603,
+      "n_class_1": 1611,
+      "class_labels": [
+        "0",
+        "1"
+      ],
+      "topic_a": 0,
+      "topic_b": 1,
+      "topic_a_words": [
+        "все",
+        "сердце",
+        "душа",
+        "день",
+        "жизнь"
+      ],
+      "topic_b_words": [
+        "небо",
+        "все",
+        "солнце",
+        "день",
+        "волна"
+      ],
+      "n_lda_topics": 20
+    }
+  }
+}
