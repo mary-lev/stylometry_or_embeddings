@@ -253,7 +253,7 @@ Pre-computed results: `experiments/exp5_interpretability/results/cross_topic_val
 
 ```
 .
-├── data/
+├── data/                 # Downloaded from Zenodo (see download_data.py)
 │   ├── russian/          # Russian poetry corpus (5,800 poems)
 │   │   ├── embeddings_gemini.npy     # 68 MB
 │   │   ├── embeddings_openai.npy     # 136 MB
@@ -261,16 +261,14 @@ Pre-computed results: `experiments/exp5_interpretability/results/cross_topic_val
 │   │   ├── embeddings_qwen8b.npy     # 91 MB
 │   │   ├── embeddings_e5-large.npy   # 23 MB
 │   │   ├── embeddings_bge-m3.npy     # 23 MB
-│   │   ├── labels.npy
 │   │   ├── poems.json
-│   │   └── prosody.json
+│   │   └── linguistic_features.json
 │   └── italian/          # Italian poetry corpus (10,400 poems)
 │       ├── embeddings_gemini.npy     # 122 MB
 │       ├── embeddings_openai.npy     # 122 MB
 │       ├── embeddings_voyage.npy     # 41 MB
 │       ├── embeddings_qwen8b.npy     # 163 MB
 │       ├── embeddings_e5-large.npy   # 41 MB
-│       ├── labels.npy
 │       ├── poems.json
 │       └── linguistic_features.json
 │
@@ -289,7 +287,11 @@ Pre-computed results: `experiments/exp5_interpretability/results/cross_topic_val
 │   ├── exp8_combined_features/
 │   └── exp8a_multi_model_comparison/
 │
-└── figures/              # Publication figures
+├── figures/              # Publication figures
+│
+├── download_data.py      # Download data from Zenodo
+├── requirements.txt      # Python dependencies
+└── LICENSE               # MIT License
 ```
 
 ---
