@@ -1,10 +1,14 @@
 # Stylometry or Embeddings? Authorship Attribution for Russian and Italian Poetry
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21736209.svg)](https://doi.org/10.5281/zenodo.21736209)
+
 This repository contains code and data for reproducing the experiments in the paper:
 
 > **Stylometry or Embeddings? Authorship Attribution for Russian and Italian Poetry**
 >
-> *Anonymous for review*
+> *Maria Levchenko (University of Bologna)*
+>
+> Journal of Computational Literary Studies
 
 
 ## Overview
@@ -24,8 +28,8 @@ We investigate what LLM embeddings encode about authorial style through a residu
 
 ```bash
 # Clone repository
-git clone https://github.com/anonymous/stylometry-embeddings-poetry.git
-cd stylometry-embeddings-poetry
+git clone https://github.com/mary-lev/stylometry_or_embeddings.git
+cd stylometry_or_embeddings
 
 # Install dependencies
 pip install -r requirements.txt
@@ -317,13 +321,15 @@ Our residualization waterfall uses 6 feature tiers:
 If you use this code or data, please cite:
 
 ```bibtex
-@article{anonymous2026stylometry,
+@article{levchenko2026stylometry,
   title={Stylometry or Embeddings? Authorship Attribution for Russian and Italian Poetry},
-  author={Anonymous},
+  author={Levchenko, Maria},
   journal={Journal of Computational Literary Studies},
   year={2026}
 }
 ```
+
+The code itself can be cited via its Zenodo archive: [10.5281/zenodo.21736209](https://doi.org/10.5281/zenodo.21736209).
 
 ---
 

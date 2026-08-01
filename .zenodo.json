@@ -1,0 +1,36 @@
+{
+    "title": "Stylometry or Embeddings? Authorship Attribution for Russian and Italian Poetry (code)",
+    "description": "<p>Code for reproducing the experiments in the paper <em>Stylometry or Embeddings? Authorship Attribution for Russian and Italian Poetry</em> (Journal of Computational Literary Studies).</p><p>We investigate what LLM embeddings encode about authorial style through a residualization analysis of two poetry corpora: Russian (5,800 poems by 29 poets, 1850&ndash;1930) and Italian (10,400 poems by 52 poets, 1200&ndash;1900). Key findings: for Russian poetry, residual signal collapses to near chance (1.1&times;) after accounting for character n-grams and word bigrams; character n-grams explain 44% of embedding variance &mdash; more than all linguistic features combined; embeddings and stylometry fail on different texts (31% overlap), indicating complementarity.</p><p>The accompanying dataset (poem texts, linguistic features, and precomputed embeddings from six models) is archived separately at <a href=\"https://doi.org/10.5281/zenodo.18260458\">10.5281/zenodo.18260458</a>.</p>",
+    "upload_type": "software",
+    "license": "MIT",
+    "creators": [
+        {
+            "name": "Levchenko, Maria",
+            "affiliation": "University of Bologna",
+            "orcid": "0009-0008-2649-0729"
+        }
+    ],
+    "keywords": [
+        "stylometry",
+        "authorship attribution",
+        "text embeddings",
+        "large language models",
+        "computational literary studies",
+        "Russian poetry",
+        "Italian poetry",
+        "digital humanities"
+    ],
+    "related_identifiers": [
+        {
+            "identifier": "10.5281/zenodo.18260458",
+            "relation": "isSupplementedBy",
+            "resource_type": "dataset",
+            "scheme": "doi"
+        },
+        {
+            "identifier": "https://github.com/mary-lev/stylometry_or_embeddings",
+            "relation": "isSupplementTo",
+            "scheme": "url"
+        }
+    ]
+}
