@@ -21,24 +21,23 @@ RESULTS_DIR.mkdir(exist_ok=True)
 
 
 def load_italian_dataset(n_per_author=200, seed=42):
-    """Load Italian clean dataset with Gemini embeddings."""
-    # Load dataset spec
-    spec_file = DATA_DIR / f"italian_clean_dataset_n{n_per_author}_seed{seed}.json"
-    with open(spec_file, 'r', encoding='utf-8') as f:
-        spec = json.load(f)
+    """Load the published Italian dataset with Gemini embeddings.
 
-    # Load labels
-    labels = np.load(DATA_DIR / f"italian_clean_labels_n{n_per_author}_seed{seed}.npy")
+    Data comes from data/italian/ through the shared loader; see
+    data/README.md. The n_per_author and seed arguments are kept for
+    call-site compatibility -- the published dataset is fixed at 200
+    poems per author, seed 42.
+    """
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+    from data_loader import load_dataset
 
-    # Load Gemini embeddings
-    emb_file = DATA_DIR / f"italian_clean_embeddings_gemini_n{n_per_author}_seed{seed}.npy"
-    embeddings = np.load(emb_file)
+    data = load_dataset('italian', embedding_model='gemini')
 
     return {
-        'embeddings': embeddings,
-        'labels': labels,
-        'author_list': spec['author_list'],
-        'n_per_author': n_per_author
+        'embeddings': data['embeddings'],
+        'labels': data['labels'],
+        'author_list': data['author_list'],
+        'n_per_author': data['metadata']['n_per_author'],
     }
 
 

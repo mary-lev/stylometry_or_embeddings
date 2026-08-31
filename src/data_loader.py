@@ -118,6 +118,36 @@ def load_dataset(
                     if idx in prosody_data:
                         poem['prosody'] = prosody_data[idx]
 
+            # Merge linguistic features into poems (Tier 3 reads
+            # poem['linguistic_features']). The two corpora ship different
+            # shapes: Russian is a flat list aligned with poems.json row order,
+            # Italian is {'metadata': ..., 'poems': {poem_id: features}}.
+            if 'linguistic_features' in result:
+                ling_data = result['linguistic_features']
+
+                if isinstance(ling_data, dict) and 'poems' in ling_data:
+                    by_id = ling_data['poems']
+                    matched = 0
+                    for poem in poems:
+                        ling = by_id.get(str(poem.get('id', '')))
+                        if ling is not None:
+                            poem['linguistic_features'] = ling
+                            matched += 1
+                    if matched != len(poems):
+                        raise ValueError(
+                            f"linguistic_features.json matched {matched} of "
+                            f"{len(poems)} poems by id; the two files disagree."
+                        )
+                else:
+                    if len(ling_data) != len(poems):
+                        raise ValueError(
+                            f"linguistic_features.json has {len(ling_data)} entries "
+                            f"but poems.json has {len(poems)}; they must be "
+                            f"row-aligned."
+                        )
+                    for poem, ling in zip(poems, ling_data):
+                        poem['linguistic_features'] = ling
+
             result['poems'] = poems
 
     return result

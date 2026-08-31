@@ -279,12 +279,9 @@ def main():
         else:
             missing.append(filepath)
 
-    if existing and not args.force:
-        print(f"\nAlready downloaded: {len(existing)} files")
-        if not missing:
-            print("All files present. Use --force to re-download.")
-            return 0
-
+    # --verify must run before the "already downloaded" short-circuit below,
+    # otherwise a complete-but-corrupt download reports success without any
+    # checksum being computed.
     if args.verify:
         print("\n[Verifying files...]")
         all_ok = True
@@ -296,6 +293,12 @@ def main():
                 print(f"  MISSING/INVALID: {filepath}")
                 all_ok = False
         return 0 if all_ok else 1
+
+    if existing and not args.force:
+        print(f"\nAlready downloaded: {len(existing)} files")
+        if not missing:
+            print("All files present. Use --force to re-download.")
+            return 0
 
     # Download missing files
     print(f"\n[Downloading {len(missing)} files...]")

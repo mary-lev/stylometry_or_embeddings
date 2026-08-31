@@ -35,8 +35,9 @@ RESULTS_DIR.mkdir(exist_ok=True)
 
 def main():
     parser = argparse.ArgumentParser(description="EXP4: Multiclass Author Attribution")
-    parser.add_argument('--use-clean-dataset', action='store_true',
-                        help='Use pre-created clean dataset (recommended)')
+    parser.add_argument('--use-clean-dataset', action='store_true', default=True,
+                        help='Use the published clean dataset (default; the legacy '
+                             'corpus mode is not available in the public release)')
     parser.add_argument('--n-per-author', type=int, default=200,
                         help='Poems per author (100 or 200 for clean dataset)')
     parser.add_argument('--min-poems', type=int, default=100,
@@ -76,28 +77,14 @@ def main():
         model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
         suffix = f"_clean_n{args.n_per_author}{model_suffix}"
     else:
-        # Legacy: Load from corpus
-        print("\n[Loading data from corpus...]")
-        from data_loader import load_corpus, balance_by_author
-
-        corpus = load_corpus(min_poems_per_author=args.min_poems, include_prosody=True, include_embeddings=True)
-
-        print("[Balancing dataset...]")
-        poems, embeddings, labels = balance_by_author(
-            corpus['poems'],
-            corpus['embeddings'],
-            n_per_author=args.n_per_author,
-            random_state=args.seed
+        # Legacy corpus mode operated on the unbalanced source corpus, which is
+        # not part of the public release (only the balanced clean dataset is
+        # published to Zenodo). See data/README.md.
+        raise SystemExit(
+            "Legacy corpus mode is not available in the public release: it needs "
+            "the raw unbalanced corpus, which is not distributed. The published "
+            "balanced dataset is used by default."
         )
-
-        unique_authors = sorted(set(labels))
-        author_to_idx = {a: i for i, a in enumerate(unique_authors)}
-        idx_to_author = {i: a for a, i in author_to_idx.items()}
-        y = np.array([author_to_idx[a] for a in labels])
-
-        n_authors = len(unique_authors)
-        n_samples = len(y)
-        suffix = "_legacy"
 
     chance_level = 1 / n_authors
 

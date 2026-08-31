@@ -51,19 +51,23 @@ def load_russian_data(n_per_author=200, seed=42, embedding_model='openai'):
 
 
 def load_italian_data(n_per_author=200, seed=42, embedding_model='gemini'):
-    """Load Italian clean dataset."""
-    spec_file = DATA_DIR / f"italian_clean_dataset_n{n_per_author}_seed{seed}.json"
-    with open(spec_file, encoding='utf-8') as f:
-        spec = json.load(f)
+    """Load the published Italian dataset.
 
-    embeddings = np.load(DATA_DIR / f"italian_clean_embeddings_{embedding_model}_n{n_per_author}_seed{seed}.npy")
-    labels = np.load(DATA_DIR / f"italian_clean_labels_n{n_per_author}_seed{seed}.npy")
+    Data comes from data/italian/ through the shared loader; see
+    data/README.md. The n_per_author and seed arguments are kept for
+    call-site compatibility -- the published dataset is fixed at 200
+    poems per author, seed 42.
+    """
+    from data_loader import load_dataset
 
-    texts_file = DATA_DIR / f"italian_clean_texts_n{n_per_author}_seed{seed}.json"
-    with open(texts_file, encoding='utf-8') as f:
-        texts = json.load(f)
+    # The published layout names this model 'qwen8b'; accept the older
+    # 'qwen-8b' spelling used by earlier result files.
+    model = {'qwen-8b': 'qwen8b'}.get(embedding_model, embedding_model)
 
-    return texts, embeddings, labels, spec['author_list']
+    data = load_dataset('italian', embedding_model=model, include_poems=True)
+    texts = [p['text'] for p in data['poems']]
+
+    return texts, data['embeddings'], data['labels'], data['author_list']
 
 
 def run_residualization_cv(X_source, X_target, y, direction_name, n_folds=5, seed=42, alpha=1.0):

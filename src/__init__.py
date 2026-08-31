@@ -10,7 +10,13 @@ Core modules for the experiment pipeline:
 - metrics: R², cosine similarity, accuracy with CIs
 """
 
-from .data_loader import load_corpus, balance_by_author
+from .data_loader import (
+    load_dataset,
+    load_clean_dataset,
+    get_author_embeddings,
+    get_pair_data,
+    get_all_author_pairs,
+)
 from .features import extract_all_features, TIER_DEFINITIONS
 from .residualization import Residualizer, compute_r2_diagnostics
 from .classifiers import CLASSIFIERS, compare_classifiers

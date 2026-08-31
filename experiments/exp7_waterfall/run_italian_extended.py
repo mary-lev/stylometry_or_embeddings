@@ -36,7 +36,7 @@ from sklearn.metrics import r2_score
 warnings.filterwarnings('ignore')
 
 # Constants
-DATA_DIR = Path(__file__).parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent / "data"
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
@@ -75,41 +75,28 @@ ITALIAN_DEP_RELATIONS = [
 
 
 def load_italian_dataset(n_per_author=200, seed=42, embedding_model='gemini'):
-    """Load Italian clean dataset with specified embeddings and linguistic features."""
-    spec_file = DATA_DIR / f"italian_clean_dataset_n{n_per_author}_seed{seed}.json"
-    with open(spec_file, encoding='utf-8') as f:
-        spec = json.load(f)
+    """Load the published Italian dataset with the requested embeddings.
 
-    emb_file = DATA_DIR / f"italian_clean_embeddings_{embedding_model}_n{n_per_author}_seed{seed}.npy"
-    embeddings = np.load(emb_file)
+    Texts, linguistic features, labels and the author list all come from
+    data/italian/ through the shared loader; see data/README.md. The
+    n_per_author and seed arguments are kept for call-site compatibility --
+    the published dataset is fixed at 200 poems per author, seed 42.
+    """
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+    from data_loader import load_dataset
 
-    labels_file = DATA_DIR / f"italian_clean_labels_n{n_per_author}_seed{seed}.npy"
-    labels = np.load(labels_file)
+    # The published layout names this model 'qwen8b'; accept the older
+    # 'qwen-8b' spelling used by earlier result files.
+    model = {'qwen-8b': 'qwen8b'}.get(embedding_model, embedding_model)
 
-    texts_file = DATA_DIR / f"italian_clean_texts_n{n_per_author}_seed{seed}.json"
-    with open(texts_file, encoding='utf-8') as f:
-        texts = json.load(f)
-
-    ling_file = DATA_DIR / f"italian_clean_linguistic_n{n_per_author}_seed{seed}.json"
-    with open(ling_file, encoding='utf-8') as f:
-        ling_data = json.load(f)
-
-    ling_poems = ling_data['poems']
-    ling_list = list(ling_poems.values())
-
-    poems = []
-    for i, text in enumerate(texts):
-        poems.append({
-            'text': text,
-            'linguistic_features': ling_list[i] if i < len(ling_list) else {}
-        })
+    data = load_dataset('italian', embedding_model=model, include_poems=True)
 
     return {
-        'embeddings': embeddings,
-        'labels': labels,
-        'author_list': spec['author_list'],
-        'poems': poems,
-        'n_per_author': n_per_author
+        'embeddings': data['embeddings'],
+        'labels': data['labels'],
+        'author_list': data['author_list'],
+        'poems': data['poems'],
+        'n_per_author': data['metadata']['n_per_author'],
     }
 
 
@@ -496,7 +483,7 @@ def main():
     parser.add_argument('--n-folds', type=int, default=5)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--embedding-model', type=str, default='gemini',
-                        choices=['gemini', 'qwen-8b'],
+                        choices=['gemini', 'qwen8b', 'qwen-8b'],
                         help='Embedding model to use (default: gemini)')
     parser.add_argument('--char-ngram-features', type=int, default=2000)
     parser.add_argument('--word-bigram-features', type=int, default=2000)

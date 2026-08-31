@@ -83,83 +83,24 @@ def run_with_clean_dataset(n_per_author=100, cv_folds=5, seed=42, embedding_mode
 
 
 def run_with_corpus(min_poems=100, min_pair_poems=50, fixed_n=None, cv_folds=5, seed=42):
-    """Run experiment using corpus directly (legacy mode)."""
-    from data_loader import load_corpus
+    """Run experiment using corpus directly (legacy mode).
 
-    print("\n[Loading corpus...]")
-    corpus = load_corpus(min_poems_per_author=min_poems, include_prosody=True, include_embeddings=True)
-    poems = corpus['poems']
-    embeddings = corpus['embeddings']
-    author_counts = corpus['author_counts']
-
-    authors = sorted(author_counts.keys())
-    n_authors = len(authors)
-    n_pairs = n_authors * (n_authors - 1) // 2
-    mode = "fixed" if fixed_n else "variable"
-
-    print(f"\n[Settings]")
-    print(f"  Authors: {n_authors}")
-    print(f"  Pairs to process: {n_pairs}")
-    print(f"  Mode: {mode.upper()}")
-    if fixed_n:
-        print(f"  Fixed N per author: {fixed_n}")
-    else:
-        print(f"  Min poems per pair: {min_pair_poems} (variable)")
-    print(f"  CV folds: {cv_folds}")
-
-    # Process all pairs
-    print(f"\n[Processing pairs...]")
-    results = []
-    skipped = 0
-
-    np.random.seed(seed)
-
-    for i, (a1, a2) in enumerate(combinations(authors, 2)):
-        if (i + 1) % 50 == 0:
-            print(f"  Progress: {i+1}/{n_pairs} pairs...")
-
-        idx1 = [j for j, p in enumerate(poems) if p['author'] == a1]
-        idx2 = [j for j, p in enumerate(poems) if p['author'] == a2]
-
-        if fixed_n is not None:
-            if len(idx1) < fixed_n or len(idx2) < fixed_n:
-                skipped += 1
-                continue
-            n_per = fixed_n
-        else:
-            if len(idx1) < min_pair_poems or len(idx2) < min_pair_poems:
-                skipped += 1
-                continue
-            n_per = min(len(idx1), len(idx2))
-
-        idx1 = np.random.choice(idx1, n_per, replace=False)
-        idx2 = np.random.choice(idx2, n_per, replace=False)
-
-        emb = np.vstack([embeddings[idx1], embeddings[idx2]])
-        labels = np.array([0] * n_per + [1] * n_per)
-
-        acc_mean, acc_std = classify_pair(emb, labels, cv_folds=cv_folds)
-
-        results.append({
-            'author1': a1,
-            'author2': a2,
-            'accuracy': acc_mean,
-            'accuracy_std': acc_std,
-            'n_per_author': n_per,
-            'distance': 2 * (acc_mean - 0.5)
-        })
-
-    if skipped > 0:
-        print(f"  Skipped: {skipped} pairs (insufficient poems)")
-
-    n_per_author = fixed_n if fixed_n else "variable"
-    return results, authors, n_per_author, seed
+    Not available in the public release: this path needs the raw unbalanced
+    corpus, which is not distributed. Only the balanced clean dataset is
+    published to Zenodo. See data/README.md.
+    """
+    raise SystemExit(
+        "Legacy corpus mode is not available in the public release: it needs "
+        "the raw unbalanced corpus, which is not distributed. The published "
+        "balanced dataset is used by default."
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(description="EXP2: All-Pairs Binary Classification")
-    parser.add_argument('--use-clean-dataset', action='store_true',
-                        help='Use pre-created clean dataset (recommended for reproducibility)')
+    parser.add_argument('--use-clean-dataset', action='store_true', default=True,
+                        help='Use the published clean dataset (default; the legacy '
+                             'corpus mode is not available in the public release)')
     parser.add_argument('--n-per-author', type=int, default=100,
                         help='Poems per author for clean dataset (100 or 200)')
     parser.add_argument('--min-poems', type=int, default=100,
