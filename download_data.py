@@ -90,8 +90,8 @@ FILES = {
         "zenodo_name": "russian_linguistic_features.json",
         "size_mb": 14,
         "md5": "a2ce664fe956608754ea133778fb72ea",
-        "required": False,
-        "description": "Linguistic features (POS, lemmas, morphology)"
+        "required": True,
+        "description": "Linguistic features (POS, lemmas, morphology) - Tier 3"
     },
 
     # Italian corpus - embeddings
@@ -142,8 +142,8 @@ FILES = {
         "zenodo_name": "italian_linguistic_features.json",
         "size_mb": 17,
         "md5": "dc1f110b3b39dbf06f028b19b157695a",
-        "required": False,
-        "description": "Linguistic features (POS, morphology)"
+        "required": True,
+        "description": "Linguistic features (POS, morphology) - Tier 3"
     },
 }
 

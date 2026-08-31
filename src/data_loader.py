@@ -122,31 +122,40 @@ def load_dataset(
             # poem['linguistic_features']). The two corpora ship different
             # shapes: Russian is a flat list aligned with poems.json row order,
             # Italian is {'metadata': ..., 'poems': {poem_id: features}}.
-            if 'linguistic_features' in result:
-                ling_data = result['linguistic_features']
+            if 'linguistic_features' not in result:
+                # Without this file every Tier 3 feature silently evaluates to
+                # zero, which quietly changes waterfall results instead of
+                # failing. Make that loud.
+                raise FileNotFoundError(
+                    f"{ling_file} not found, but Tier 3 (grammar) features are "
+                    f"derived from it; without it every Tier 3 feature would be "
+                    f"silently zero. Run: python download_data.py --minimal"
+                )
 
-                if isinstance(ling_data, dict) and 'poems' in ling_data:
-                    by_id = ling_data['poems']
-                    matched = 0
-                    for poem in poems:
-                        ling = by_id.get(str(poem.get('id', '')))
-                        if ling is not None:
-                            poem['linguistic_features'] = ling
-                            matched += 1
-                    if matched != len(poems):
-                        raise ValueError(
-                            f"linguistic_features.json matched {matched} of "
-                            f"{len(poems)} poems by id; the two files disagree."
-                        )
-                else:
-                    if len(ling_data) != len(poems):
-                        raise ValueError(
-                            f"linguistic_features.json has {len(ling_data)} entries "
-                            f"but poems.json has {len(poems)}; they must be "
-                            f"row-aligned."
-                        )
-                    for poem, ling in zip(poems, ling_data):
+            ling_data = result['linguistic_features']
+
+            if isinstance(ling_data, dict) and 'poems' in ling_data:
+                by_id = ling_data['poems']
+                matched = 0
+                for poem in poems:
+                    ling = by_id.get(str(poem.get('id', '')))
+                    if ling is not None:
                         poem['linguistic_features'] = ling
+                        matched += 1
+                if matched != len(poems):
+                    raise ValueError(
+                        f"linguistic_features.json matched {matched} of "
+                        f"{len(poems)} poems by id; the two files disagree."
+                    )
+            else:
+                if len(ling_data) != len(poems):
+                    raise ValueError(
+                        f"linguistic_features.json has {len(ling_data)} entries "
+                        f"but poems.json has {len(poems)}; they must be "
+                        f"row-aligned."
+                    )
+                for poem, ling in zip(poems, ling_data):
+                    poem['linguistic_features'] = ling
 
             result['poems'] = poems
 

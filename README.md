@@ -34,7 +34,7 @@ cd stylometry_or_embeddings
 # Install dependencies
 pip install -r requirements.txt
 
-# Download data from Zenodo (embeddings + poems, ~220 MB for minimal)
+# Download data from Zenodo (embeddings + poems + linguistic features, ~251 MB for minimal)
 python download_data.py --minimal    # Required files only
 # OR
 python download_data.py --all        # All embedding models (~896 MB)
@@ -54,7 +54,7 @@ python experiments/exp7_waterfall/run_extended.py --embedding-model gemini
 The `download_data.py` script automatically downloads and verifies all required files:
 
 ```bash
-python download_data.py --minimal    # Required files only (~220 MB)
+python download_data.py --minimal    # Required files only (~251 MB)
 python download_data.py --all        # All embedding models (~896 MB)
 python download_data.py --verify     # Check existing files
 ```
