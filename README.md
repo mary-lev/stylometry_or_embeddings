@@ -107,11 +107,15 @@ Pre-computed results: `experiments/exp8a_multi_model_comparison/results/`
 | Model | Russian Accuracy | Italian Accuracy |
 |-------|-----------------|------------------|
 | Gemini text-embedding-001 | **61.3%** | **67.1%** |
-| Voyage-3-large | 55.3% | 61.2% |
-| OpenAI text-embedding-3-large | 55.9% | 59.8% |
-| Qwen3-Embedding-8B | 50.7% | 57.6% |
-| E5-large | 42.1% | 48.3% |
-| BGE-M3 | 38.9% | 45.7% |
+| OpenAI text-embedding-3-large | 56.1% | 65.4% |
+| Voyage-3-large | 51.6% | 59.4% |
+| Qwen3-Embedding-8B | 50.8% | 57.6% |
+| E5-large | 47.2% | 61.3% |
+| BGE-M3 | 41.9% | — (Russian only) |
+
+Chance is 3.4% (Russian) and 1.9% (Italian). Gemini ranks highest and Qwen3-8B is
+the strongest open-source model in both corpora, which is why those two are carried
+through the main analysis.
 
 ---
 
@@ -124,8 +128,11 @@ python experiments/exp7_waterfall/run_extended.py --embedding-model gemini
 # Russian corpus with Qwen3-8B embeddings
 python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
 
-# Italian corpus
+# Italian corpus with Gemini embeddings
 python experiments/exp7_waterfall/run_italian_extended.py --embedding-model gemini
+
+# Italian corpus with Qwen3-8B embeddings
+python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
 ```
 
 Pre-computed results: `experiments/exp7_waterfall/results/`
@@ -139,11 +146,10 @@ Pre-computed results: `experiments/exp7_waterfall/results/`
 | **Baseline embeddings** | 61.3% | 50.7% | 67.0% | 57.6% |
 | After interpretable (T1-T4) | 40.0% | 32.2% | 46.0% | 41.1% |
 | After char n-grams (T5) | 10.2% | 8.3% | 16.1% | 16.8% |
-| After word bigrams (T6) | 3.9% | 4.0% | 8.7% | 9.5% |
-| **Final residual** | **3.7%** | **3.9%** | **8.9%** | **9.4%** |
+| After word bigrams (T6) | 3.8% | 4.0% | 8.7% | 9.5% |
+| **Final residual (kernel control)** | **3.8%** | **3.8%** | **8.9%** | **9.4%** |
 | | | | | |
 | **Final lift vs. chance** | **1.1×** | **1.1×** | **4.6×** | **4.9×** |
-| **Total R² explained** | **80.1%** | **79.9%** | **85.1%** | **74.4%** |
 | Chance level | 3.4% | 3.4% | 1.9% | 1.9% |
 
 **Key insight**: For Russian, the residual drops to chance after removing character-level features.
@@ -201,10 +207,15 @@ Pre-computed results: `experiments/exp4_multiclass/results/`
 ### Tables 6-7: Probing Analysis
 
 ```bash
+# Classification probes (semantic and prosodic properties)
 python experiments/exp5_interpretability/run.py
+
+# Continuous probes (lexical and punctuation properties, Ridge regression)
+python experiments/exp7_waterfall/probe_discriminative_features.py
 ```
 
 Pre-computed results: `experiments/exp5_interpretability/results/probing_results.json`
+and `experiments/exp7_waterfall/results/probe_discriminative_gemini.json`
 
 **Expected output:**
 
@@ -212,23 +223,27 @@ Pre-computed results: `experiments/exp5_interpretability/results/probing_results
 
 | Property | R² | Encoding |
 |----------|-----|----------|
-| Vocabulary diversity (500-2000 MFW) | 0.77 | Strong |
+| Vocabulary diversity (1-100 MFW) | 0.77 | Strong |
 | Vocabulary diversity (100-500 MFW) | 0.68 | Strong |
-| Vocabulary diversity (1-100 MFW) | 0.63 | Strong |
+| Vocabulary diversity (500-2000 MFW) | 0.63 | Strong |
 | Exclamation rate | 0.53 | Moderate |
 | Ellipsis rate | 0.44 | Moderate |
 | Em-dash rate | 0.30 | Moderate |
+| Hyphen rate | -0.37 | Not encoded |
+| Colon rate | < 0 | Not encoded |
 
 #### Classification Properties (Logistic Regression)
 
 | Property | Type | Accuracy | Chance | Lift |
 |----------|------|----------|--------|------|
 | Topic (Inner vs. Nature) | Semantic | 81.3% | 50% | 1.6× |
-| Rhyme (ABAB vs. AABB) | Prosodic | 70.1% | 50% | 1.4× |
-| Meter (Iamb vs. Trochee) | Prosodic | 67.5% | 50% | 1.4× |
-| Feet (4 vs. 5) | Prosodic | 66.0% | 50% | 1.3× |
+| Meter (Iamb vs. Trochee) | Prosodic | 65.1% | 50% | 1.3× |
+| Feet (4 vs. 5) | Prosodic | 63.3% | 50% | 1.3× |
+| Rhyme (ABAB vs. AABB) | Prosodic | 61.0% | 50% | 1.2× |
+| Clausula (regular vs. free) | Prosodic | 56.2% | 50% | 1.1× |
+| Meter (5-class) | Prosodic | 32.8% | 20% | 1.6× |
 
-**Finding**: Embeddings encode semantic content (topic: 81%) more strongly than prosodic structure (58-70%).
+**Finding**: Embeddings encode semantic content (topic: 81%) more strongly than prosodic structure (56-65%).
 
 ---
 
@@ -250,6 +265,92 @@ Pre-computed results: `experiments/exp5_interpretability/results/cross_topic_val
 | **Cross-topic** | **35.7%** | **-25.6 pp** |
 
 **Finding**: ~40% of signal is topic-dependent, ~60% reflects genuine stylistic patterns.
+
+---
+
+### Vocabulary Frequency Bands
+
+```bash
+python experiments/exp7_waterfall/analyze_frequency_bands.py
+```
+
+Pre-computed results: `experiments/exp7_waterfall/results/frequency_band_analysis.json`
+
+**Expected output:**
+
+| Frequency band | Word type | Accuracy |
+|----------------|-----------|----------|
+| 1-100 | Function words | 76.4% |
+| 100-500 | Style markers | 76.6% |
+| 500-2000 | Topic vocabulary | **77.6%** |
+| 2000-5000 | Rare vocabulary | 74.0% |
+
+**Finding**: The prose pattern inverts — topic vocabulary is the most
+author-discriminative band for poetry, not function words.
+
+---
+
+### Binary Attribution Error by Text Length
+
+```bash
+# Per-poem method comparison (produces method_differences_*.json)
+python experiments/exp2_binary_pairs/analyze_method_differences.py
+
+# Figure, plotted from the analysis above
+python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
+```
+
+Pre-computed results: `experiments/exp2_binary_pairs/results/`
+
+---
+
+### Embedding Ablation (Perturbation Analysis)
+
+Measures how far embeddings move when content words are masked versus when word
+order is shuffled — the basis for the claim that semantic content dominates
+embedding geometry (cosine distance 0.134 vs. 0.027).
+
+```bash
+python experiments/exp10_embedding_structure/run_ablation.py
+```
+
+Runs offline by default — no API key, no cost.
+
+**Expected output:**
+
+| Modification | Cosine distance from original |
+|--------------|-------------------------------|
+| Mask content words | **0.1337** ± 0.0243 |
+| Shuffle word order | 0.0266 ± 0.0081 |
+| Shuffle line order | 0.0201 ± 0.0092 |
+| Remove punctuation | 0.0191 ± 0.0055 |
+| Lowercase | 0.0042 ± 0.0030 |
+
+**Finding**: Masking content words moves embeddings ~5× further than shuffling
+word order — semantic content dominates embedding geometry.
+
+Pre-computed results: `experiments/exp10_embedding_structure/results/ablation_results.json`,
+which stores the per-poem cosine distance for all 290 sampled poems across all five
+ablations. Every number above is recomputed from that file.
+
+<details>
+<summary>Regenerating the distances from scratch (optional, requires an API key)</summary>
+
+Unlike every other experiment, this one perturbs the poem text and must re-embed
+the *modified* text, so the Zenodo embeddings — which cover the original poems
+only — cannot supply it. Regenerating therefore calls the Gemini API once per
+poem per ablation (290 × 5 = 1,450 calls) and costs money. This is **not**
+required to reproduce the published result — the default command above already
+does that.
+
+```bash
+export GEMINI_API_KEY=YOUR_API_KEY_HERE
+python experiments/exp10_embedding_structure/run_ablation.py --regenerate
+
+# Preview the perturbations and call count without calling the API
+python experiments/exp10_embedding_structure/run_ablation.py --dry-run
+```
+</details>
 
 ---
 
@@ -283,13 +384,15 @@ Pre-computed results: `experiments/exp5_interpretability/results/cross_topic_val
 │   └── ...
 │
 ├── experiments/          # Experiment scripts + pre-computed results
-│   ├── exp0_stylometry_baseline/
-│   ├── exp2_binary_pairs/
-│   ├── exp4_multiclass/
-│   ├── exp5_interpretability/
-│   ├── exp7_waterfall/
-│   ├── exp8_combined_features/
-│   └── exp8a_multi_model_comparison/
+│   ├── exp0_stylometry_baseline/   # Stylometry baselines
+│   ├── exp2_binary_pairs/          # Pairwise attribution, error by length
+│   ├── exp4_multiclass/            # Multiclass attribution, text length
+│   ├── exp5_interpretability/      # Classification probes, cross-topic
+│   ├── exp7_waterfall/             # Residualization waterfall, continuous
+│   │                               #   probes, frequency bands
+│   ├── exp8_combined_features/     # Combined features, bidirectional
+│   ├── exp8a_multi_model_comparison/  # Embedding model comparison
+│   └── exp10_embedding_structure/  # Ablation / perturbation analysis
 │
 ├── figures/              # Publication figures
 │

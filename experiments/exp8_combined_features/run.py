@@ -139,7 +139,7 @@ def main():
                         help='CV folds')
     parser.add_argument('--seed', type=int, default=42,
                         help='Random seed')
-    parser.add_argument('--embedding-model', type=str, default='openai',
+    parser.add_argument('--embedding-model', type=str, default='gemini',
                         choices=['openai', 'gemini'],
                         help='Embedding model to use (default: openai)')
     parser.add_argument('--pairwise', action='store_true',

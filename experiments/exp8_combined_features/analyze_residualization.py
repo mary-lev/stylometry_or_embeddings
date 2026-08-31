@@ -166,7 +166,7 @@ def main():
     parser.add_argument('--language', type=str, default='russian',
                         choices=['russian', 'italian'],
                         help='Language to analyze')
-    parser.add_argument('--embedding-model', type=str, default='openai',
+    parser.add_argument('--embedding-model', type=str, default='gemini',
                         choices=['openai', 'gemini', 'qwen8b', 'qwen-8b'],
                         help='Embedding model')
     parser.add_argument('--n-per-author', type=int, default=200,
