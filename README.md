@@ -354,6 +354,39 @@ python experiments/exp10_embedding_structure/run_ablation.py --dry-run
 
 ---
 
+### Regenerating the Figures
+
+Every figure in `figures/` is generated from the results files, not hand-edited.
+Run the corresponding experiment first, then its plotting script:
+
+```bash
+# Figure 1: embedding model comparison
+python experiments/exp8a_multi_model_comparison/run.py
+python experiments/exp8a_multi_model_comparison/visualize_model_comparison.py
+
+# Embeddings + stylometry combination (Russian and Italian)
+python experiments/exp8a_multi_model_comparison/visualize.py
+python experiments/exp8a_multi_model_comparison/visualize_italian.py
+
+# Waterfall figures (Gemini and Qwen3-8B, both languages)
+python experiments/exp7_waterfall/run_extended.py --embedding-model gemini
+python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
+python experiments/exp7_waterfall/run_italian_extended.py --embedding-model gemini
+python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
+python experiments/exp7_waterfall/make_waterfall_figures.py
+
+# Binary attribution error by text length
+python experiments/exp2_binary_pairs/analyze_method_differences.py
+python experiments/exp2_binary_pairs/analyze_method_differences_italian.py
+python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
+```
+
+**Note on Qwen-0.6B**: Figure 1 includes a seventh model, Qwen3-Embedding-0.6B,
+whose embeddings are **not** part of the Zenodo release. `run.py` skips it
+automatically when the file is absent, producing the six-model figure instead.
+
+---
+
 ## Repository Structure
 
 ```

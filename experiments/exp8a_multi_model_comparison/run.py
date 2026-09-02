@@ -94,6 +94,12 @@ MODELS = {
         'file': 'russian/embeddings_bge-m3.npy',
         'type': 'Local',
         'dims': 1024
+    },
+    # Not part of the Zenodo release; skipped automatically when absent.
+    'Qwen-0.6B': {
+        'file': 'russian/embeddings_qwen06b.npy',
+        'type': 'Local',
+        'dims': 1024
     }
 }
 

@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 RES = Path(__file__).parent / "results"
-OUT = Path(__file__).parent.parent.parent / "results" / "figures"
+OUT = Path(__file__).parent.parent.parent / "figures"
+OUT.mkdir(parents=True, exist_ok=True)
 
 def load(f):
     d = json.load(open(RES / f))
