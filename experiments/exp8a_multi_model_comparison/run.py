@@ -4,12 +4,18 @@ EXPERIMENT 8a: Multi-Model Comparison with Stylometry
 
 Compare all 7 embedding models with stylometry:
 - Embeddings only
-- Stylometry only (FULL: char n-grams + word n-grams + function words)
+- Stylometry only
 - Combined (embeddings + stylometry)
 - Residualization analysis (unique signal in each)
 
-NOTE (Jan 2026): Updated to use full_combined stylometry (61.7%) instead of
-char 3-grams only (58.4%). This is the proper baseline for fair comparison.
+Stylometry feature set (--stylometry):
+  char3_func (default)  char 3-grams + function words. Matches the paper's
+                        Table "embeddings, stylometry, and their combination"
+                        and the published combined-comparison figures
+                        (Russian stylometry 59.2%, Gemini combined 71.3%).
+  full                  char 2-4 grams + word 1-2 grams + function words.
+                        A broader baseline (Russian 62.2%); does NOT match
+                        the paper's tables. Was the default Jan-Jun 2026.
 
 Models:
 1. Gemini gemini-embedding-001 (API, 3072d)
@@ -23,6 +29,7 @@ Models:
 
 import sys
 import json
+import argparse
 import numpy as np
 from pathlib import Path
 from scipy.sparse import hstack
@@ -163,9 +170,22 @@ def analyze_model(model_name, embeddings, X_char, labels, chance):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="EXP8a: Multi-Model Comparison with Stylometry")
+    parser.add_argument('--stylometry', dest='stylometry_set', default='char3_func',
+                        choices=['char3_func', 'full'],
+                        help="Stylometry feature set. 'char3_func' (default) = char "
+                             "3-grams + function words, matching the paper's tables "
+                             "and published figures. 'full' = char 2-4 grams + word "
+                             "1-2 grams + function words (a broader baseline that "
+                             "scores ~3pp higher and does not match the tables).")
+    args = parser.parse_args()
+    stylometry_set = args.stylometry_set
+
     print("=" * 80)
     print("EXPERIMENT 8a: Multi-Model Comparison with Stylometry")
     print("=" * 80)
+    print(f"Stylometry feature set: {stylometry_set}")
 
     # Load data
     print("\n[Loading data...]")
@@ -181,20 +201,17 @@ def main():
 
     print(f"  Samples: {n_samples}, Authors: {n_authors}")
 
-    # Extract FULL stylometry features (char n-grams + word n-grams + function words)
-    print("\n[Extracting full stylometry features...]")
+    # Stylometry features. Two definitions are supported:
+    #
+    #   char3_func (default) -- char 3-grams + function words. This is the
+    #       definition used by Table "Multiclass attribution for embeddings,
+    #       stylometry, and their combination" and by exp8_combined_features,
+    #       and it is what the published combined-comparison figures show.
+    #   full -- char 2-4 grams + word 1-2 grams + function words. A broader
+    #       baseline; scores ~3pp higher and does NOT match the paper's tables.
+    print(f"\n[Extracting stylometry features: {stylometry_set}...]")
 
-    # Char n-grams (2-4)
-    char_vec = TfidfVectorizer(analyzer='char', ngram_range=(2, 4), max_features=2000)
-    X_char_ngrams = char_vec.fit_transform(texts)
-    print(f"  Char n-grams (2-4): {X_char_ngrams.shape[1]} features")
-
-    # Word n-grams (1-2)
-    word_vec = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), max_features=2000)
-    X_word_ngrams = word_vec.fit_transform(texts)
-    print(f"  Word n-grams (1-2): {X_word_ngrams.shape[1]} features")
-
-    # Function words
+    # Function words (shared by both definitions)
     func_vec = CountVectorizer(analyzer='word', vocabulary=RUSSIAN_FUNCTION_WORDS, lowercase=True)
     X_func_counts = func_vec.fit_transform(texts)
     row_sums = X_func_counts.sum(axis=1).A1
@@ -202,8 +219,22 @@ def main():
     X_func = X_func_counts.multiply(1 / row_sums[:, np.newaxis])
     print(f"  Function words: {X_func.shape[1]} features")
 
-    # Combine all stylometry features
-    X_stylometry_sparse = hstack([X_char_ngrams, X_word_ngrams, X_func])
+    # Char n-grams (2-4) are also used as the "char only" reference below
+    char_vec = TfidfVectorizer(analyzer='char', ngram_range=(2, 4), max_features=2000)
+    X_char_ngrams = char_vec.fit_transform(texts)
+    print(f"  Char n-grams (2-4): {X_char_ngrams.shape[1]} features")
+
+    if stylometry_set == 'char3_func':
+        char3_vec = TfidfVectorizer(analyzer='char', ngram_range=(3, 3), max_features=2000)
+        X_char3 = char3_vec.fit_transform(texts)
+        print(f"  Char 3-grams: {X_char3.shape[1]} features")
+        X_stylometry_sparse = hstack([X_char3, X_func])
+    else:
+        word_vec = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), max_features=2000)
+        X_word_ngrams = word_vec.fit_transform(texts)
+        print(f"  Word n-grams (1-2): {X_word_ngrams.shape[1]} features")
+        X_stylometry_sparse = hstack([X_char_ngrams, X_word_ngrams, X_func])
+
     X_stylometry = X_stylometry_sparse.toarray()
     print(f"  Total stylometry features: {X_stylometry.shape[1]}")
 
@@ -222,6 +253,7 @@ def main():
     # Analyze each model
     all_results = {
         'stylometry': {
+            'feature_set': stylometry_set,
             'full': {'acc': acc_styl, 'std': std_styl, 'features': X_stylometry.shape[1]},
             'char_only': {'acc': acc_char_only, 'std': std_char_only, 'features': X_char.shape[1]}
         },

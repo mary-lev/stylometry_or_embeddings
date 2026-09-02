@@ -17,6 +17,7 @@ Available Italian Models:
 
 import sys
 import json
+import argparse
 import numpy as np
 from pathlib import Path
 from scipy.sparse import hstack
@@ -167,6 +168,16 @@ def analyze_model(model_name, embeddings, X_stylometry, labels, chance):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="EXP8a (Italian): Multi-Model Comparison with Stylometry")
+    parser.add_argument('--stylometry', dest='stylometry_set', default='char3_func',
+                        choices=['char3_func', 'full'],
+                        help="Stylometry feature set. 'char3_func' (default) = char "
+                             "3-grams + function words, matching the paper's tables "
+                             "and published figures. 'full' = char 2-4 grams + word "
+                             "1-2 grams + function words.")
+    stylometry_set = parser.parse_args().stylometry_set
+    print(f"Stylometry feature set: {stylometry_set}")
     print("=" * 80)
     print("EXPERIMENT 8a: Multi-Model Comparison with Stylometry (ITALIAN)")
     print("=" * 80)
@@ -186,18 +197,22 @@ def main():
     print(f"  Samples: {n_samples}, Authors: {n_authors}")
     print(f"  Chance level: {chance:.2%}")
 
-    # Extract FULL stylometry features (char n-grams + word n-grams + function words)
-    print("\n[Extracting full stylometry features...]")
+    # Stylometry features -- see --stylometry.
+    print(f"\n[Extracting stylometry features: {stylometry_set}...]")
 
-    # Char n-grams (2-4)
+    # Char n-grams (2-4) also serve as the "char only" reference below
     char_vec = TfidfVectorizer(analyzer='char', ngram_range=(2, 4), max_features=2000)
     X_char_ngrams = char_vec.fit_transform(texts)
     print(f"  Char n-grams (2-4): {X_char_ngrams.shape[1]} features")
 
-    # Word n-grams (1-2)
-    word_vec = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), max_features=2000)
-    X_word_ngrams = word_vec.fit_transform(texts)
-    print(f"  Word n-grams (1-2): {X_word_ngrams.shape[1]} features")
+    if stylometry_set == 'full':
+        word_vec = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), max_features=2000)
+        X_word_ngrams = word_vec.fit_transform(texts)
+        print(f"  Word n-grams (1-2): {X_word_ngrams.shape[1]} features")
+    else:
+        char3_vec = TfidfVectorizer(analyzer='char', ngram_range=(3, 3), max_features=2000)
+        X_char3 = char3_vec.fit_transform(texts)
+        print(f"  Char 3-grams: {X_char3.shape[1]} features")
 
     # Function words
     func_vec = CountVectorizer(analyzer='word', vocabulary=ITALIAN_FUNCTION_WORDS, lowercase=True)
@@ -207,8 +222,11 @@ def main():
     X_func = X_func_counts.multiply(1 / row_sums[:, np.newaxis])
     print(f"  Function words: {X_func.shape[1]} features")
 
-    # Combine all stylometry features
-    X_stylometry_sparse = hstack([X_char_ngrams, X_word_ngrams, X_func])
+    # Combine stylometry features
+    if stylometry_set == 'full':
+        X_stylometry_sparse = hstack([X_char_ngrams, X_word_ngrams, X_func])
+    else:
+        X_stylometry_sparse = hstack([X_char3, X_func])
     X_stylometry = X_stylometry_sparse.toarray()
     print(f"  Total stylometry features: {X_stylometry.shape[1]}")
 
