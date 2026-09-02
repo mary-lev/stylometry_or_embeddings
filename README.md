@@ -20,8 +20,8 @@ We investigate what LLM embeddings encode about authorial style through a residu
 ### Key Findings
 
 1. **For Russian poetry, residual signal collapses to near chance (1.1×)** after accounting for character n-grams and word bigrams
-2. **Character n-grams explain 44% of embedding variance** — more than all linguistic features combined
-3. **Embeddings and stylometry fail on different texts** (31% overlap), indicating complementarity
+2. **Character n-grams explain 63% of embedding variance** — far more than all interpretable linguistic features combined (~11%)
+3. **Embeddings and stylometry fail on different texts** (39% error overlap, Jaccard), indicating complementarity
 
 
 ## Quick Start
@@ -265,6 +265,52 @@ Pre-computed results: `experiments/exp5_interpretability/results/cross_topic_val
 | **Cross-topic** | **35.7%** | **-25.6 pp** |
 
 **Finding**: ~40% of signal is topic-dependent, ~60% reflects genuine stylistic patterns.
+
+---
+
+### Permutation Test (Residual Significance)
+
+Tests whether the final residual accuracy is significantly above chance.
+
+```bash
+python experiments/exp7_waterfall/run_permutation_test.py
+python experiments/exp7_waterfall/run_permutation_test.py --language italian
+```
+
+Runs in seconds by default — the published results files store all 1,000 null
+accuracies, so the test is re-derived from them rather than recomputed.
+
+**Expected output:**
+
+| | Russian | Italian |
+|---|---------|---------|
+| Null mean | 3.4% | 1.9% |
+| Null 95% CI | [3.0%, 3.9%] | [1.7%, 2.2%] |
+| Observed residual | 3.8% | 8.9% |
+| p-value | 0.08 | < 0.001 |
+| Conclusion | not above chance | above chance |
+
+Pre-computed results: `experiments/exp7_waterfall/results/permutation_test_*.json`
+
+<details>
+<summary>Regenerating the null distribution (optional, hours)</summary>
+
+`--recompute` reshuffles labels 1,000 times and re-classifies each time:
+roughly **3.5 h for Russian and 7 h for Italian** (53 s setup + ~13 s per
+permutation). This is not needed to verify the published result.
+
+```bash
+python experiments/exp7_waterfall/run_permutation_test.py --recompute
+```
+
+Note that this script and `run_extended.py` residualize differently: the
+waterfall fits per fold on training data only (residual 3.8% / 8.9%, the value
+the paper reports), while the permutation test residualizes once over all data
+to hold the residuals fixed while labels are shuffled (giving a lower
+`observed_accuracy` of 1.2% / 2.5% in the results file). The null distribution
+is label-independent and applies to either; the verification above compares it
+against the waterfall residual.
+</details>
 
 ---
 

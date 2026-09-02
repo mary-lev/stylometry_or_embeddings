@@ -394,6 +394,72 @@ def run_permutation_test(residuals, y, n_permutations=1000, seed=42, n_folds=5):
     }
 
 
+def verify_from_published(language, embedding_model):
+    """Re-derive the paper's significance test from the stored null distribution.
+
+    The published results file keeps all 1,000 null accuracies, so the paper's
+    claim can be checked in seconds instead of re-running the permutations.
+
+    Note on which "observed" value is used. Two residualization protocols appear
+    in this study:
+
+      * run_extended.py residualizes per fold, fitting on the training split
+        only. Its final residual is the number reported in the waterfall table
+        (Russian 3.8%, Italian 8.9%) and is what the paper tests.
+      * this script residualizes once over all data to obtain fixed residuals,
+        so that a permutation only reshuffles labels. Classifying those fixed
+        residuals gives a lower figure (Russian 1.2%, Italian 2.5%), which is
+        stored as 'observed_accuracy'.
+
+    The null distribution is label-independent and is therefore the correct
+    reference for either. We compare against the waterfall residual, which is
+    the quantity the paper reports.
+    """
+    res_file = RESULTS_DIR / f"permutation_test_{language}_{embedding_model}.json"
+    wf_file = (RESULTS_DIR / f"waterfall_extended_{embedding_model}.json"
+               if language == 'russian'
+               else RESULTS_DIR / f"waterfall_extended_italian_{embedding_model}.json")
+
+    if not res_file.exists():
+        print(f"ERROR: {res_file} not found. Run with --recompute to generate it.")
+        return 1
+    with open(res_file, encoding='utf-8') as f:
+        pub = json.load(f)
+    null = np.array(pub['null_distribution'])
+
+    observed = None
+    if wf_file.exists():
+        with open(wf_file, encoding='utf-8') as f:
+            wf = json.load(f)
+        exp = wf['experiments'].get('extended_6tier') or wf['experiments'].get('extended_5tier')
+        observed = exp['stages']['after_kernel']['accuracy']
+        src = wf_file.name
+    else:
+        observed = pub['observed_accuracy']
+        src = f"{res_file.name} (waterfall results not found)"
+
+    chance = pub['chance_level']
+    ci_low, ci_high = np.percentile(null, 2.5), np.percentile(null, 97.5)
+    p_value = float(np.mean(null >= observed))
+
+    print("=" * 70)
+    print(f"PERMUTATION TEST -- verifying published result ({language}, {embedding_model})")
+    print("=" * 70)
+    print(f"\n  Null distribution: {len(null)} permutations from {res_file.name}")
+    print(f"    mean:     {null.mean():.2%}")
+    print(f"    95% CI:   [{ci_low:.2%}, {ci_high:.2%}]")
+    print(f"    chance:   {chance:.2%}")
+    print(f"\n  Observed residual: {observed:.2%}   (from {src})")
+    print(f"    p-value:            {p_value:.3f}")
+    print(f"    within null 95% CI: {bool(ci_low <= observed <= ci_high)}")
+    verdict = ("NOT significantly above chance" if p_value >= 0.05
+               else "significantly above chance")
+    print(f"\n  Conclusion: residual is {verdict} (p = {p_value:.3f})")
+    print("\n  Re-run the permutations from scratch with --recompute "
+          "(~3.5 h Russian, ~7 h Italian).")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description="Permutation Test for Residual Significance")
     parser.add_argument('--language', type=str, default='russian',
@@ -412,7 +478,15 @@ def main():
                         help='Char n-gram features (default: 2000)')
     parser.add_argument('--word-bigram-features', type=int, default=2000,
                         help='Word bigram features (default: 2000)')
+    parser.add_argument('--recompute', action='store_true',
+                        help='Regenerate the null distribution from scratch. SLOW: '
+                             'about 3.5 h for Russian and 7 h for Italian at n=1000 '
+                             '(53 s setup + ~13 s per permutation). Not needed to '
+                             'verify the published result.')
     args = parser.parse_args()
+
+    if not args.recompute:
+        return verify_from_published(args.language, args.embedding_model)
 
     print("=" * 70)
     print("PERMUTATION TEST: Validating Residual = Chance Claim")
