@@ -421,9 +421,18 @@ def verify_from_published(language, embedding_model):
     the quantity the paper reports.
     """
     res_file = RESULTS_DIR / f"permutation_test_{language}_{embedding_model}.json"
-    wf_file = (RESULTS_DIR / f"waterfall_extended_{embedding_model}.json"
-               if language == 'russian'
-               else RESULTS_DIR / f"waterfall_extended_italian_{embedding_model}.json")
+
+    # Waterfall result filenames vary across runs: the Italian Gemini file
+    # carries no model suffix and the Italian Qwen one is hyphenated. Try the
+    # known spellings so a fresh clone finds the shipped results.
+    if language == 'russian':
+        candidates = [f"waterfall_extended_{embedding_model}.json"]
+    else:
+        candidates = [f"waterfall_extended_italian_{embedding_model}.json",
+                      f"waterfall_extended_italian_{embedding_model.replace('qwen8b', 'qwen-8b')}.json",
+                      "waterfall_extended_italian.json"]
+    wf_file = next((RESULTS_DIR / c for c in candidates if (RESULTS_DIR / c).exists()),
+                   RESULTS_DIR / candidates[0])
 
     if not res_file.exists():
         print(f"ERROR: {res_file} not found. Run with --recompute to generate it.")

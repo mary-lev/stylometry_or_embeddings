@@ -53,53 +53,65 @@ runs the actual experiments, shortest first.
 Commands are grouped by cost so you can stop at any stage. Everything in
 stages 1–3 runs on the `--minimal` download; only stage 4 needs more.
 
-Timings are from one 20-core machine and are indicative, not guarantees.
+**Nearly every command runs as written, with no arguments.** Defaults are the
+published settings: Russian, Gemini embeddings, 200 poems per author, seed 42,
+5-fold CV. Stages 2 and 3 are argument-free entirely. Arguments appear in only
+four places, each selecting something genuinely different: `--verify` and
+`--all` for the downloader, `--language italian` for the Italian permutation
+test, and `--embedding-model qwen8b` for the two Qwen3-8B waterfall columns.
 
-### Stage 1 — verify (seconds, no computation)
+The comment after each command is the headline number it should print, so you
+can check as you go. Full expected output for each is in *Reproducing Results*
+below. Timings are from one 20-core machine and are indicative.
 
-These re-derive published numbers from the results files in the repository.
-Nothing is recomputed, so they are the fastest way to confirm the repository
-is intact.
+### Stage 1 — verify (about 3 seconds in total)
+
+These re-derive published numbers from the results files already in the
+repository. Nothing is recomputed, so this is the fastest way to confirm the
+download and installation are sound.
 
 ```bash
-python download_data.py --verify                                  # checksums
-python experiments/exp7_waterfall/run_permutation_test.py         # Russian
+python download_data.py --verify                              # 6 files OK
+python experiments/exp7_waterfall/run_permutation_test.py     # RU: not above chance
 python experiments/exp7_waterfall/run_permutation_test.py --language italian
-python experiments/exp10_embedding_structure/run_ablation.py      # perturbation
-python experiments/exp7_waterfall/make_waterfall_figures.py       # 2 figures
+                                                              # IT: above chance, p<0.001
+python experiments/exp10_embedding_structure/run_ablation.py  # mask 0.134 / shuffle 0.027
+python experiments/exp7_waterfall/make_waterfall_figures.py   # writes 2 PNGs
 ```
 
 ### Stage 2 — fast experiments (a few minutes each)
 
 ```bash
-python experiments/exp5_interpretability/run.py                   # Table 7
-python experiments/exp5_interpretability/run_cross_topic.py       # Table 8
-python experiments/exp8_combined_features/run.py                  # Table 2 (RU)
+python experiments/exp5_interpretability/run.py               # topic probe 81.3%
+python experiments/exp5_interpretability/run_cross_topic.py   # cross-topic 35.7%
+python experiments/exp8_combined_features/run.py              # 61.3 / 59.2 / 70.5
 python experiments/exp8_combined_features/analyze_residualization.py
-python experiments/exp4_multiclass/run.py                         # confusion matrix
-python experiments/exp2_binary_pairs/run_italian.py               # Italian pairwise
+                                                              # residual embeddings ~12.5%
+python experiments/exp4_multiclass/run.py                     # multiclass 61.3%
+python experiments/exp2_binary_pairs/run_italian.py           # Italian pairwise
 ```
 
 ### Stage 3 — main results (10–40 minutes each)
 
-Run these in the order given; the last two depend on the ones above them.
-
 ```bash
-# Table 3, the main result (Italian is the slowest at ~40 min)
-python experiments/exp7_waterfall/run_extended.py --embedding-model gemini
-python experiments/exp7_waterfall/run_italian_extended.py --embedding-model gemini
+# Table 3, the main result. Italian is the slowest here, about 40 minutes.
+python experiments/exp7_waterfall/run_extended.py             # 61.3 -> 3.8% (1.1x chance)
+python experiments/exp7_waterfall/run_italian_extended.py     # 67.0 -> 8.9% (4.6x chance)
 
-# Table 2 (Italian), Table 4, Table 6, frequency bands
-python experiments/exp8_combined_features/run_italian.py
-python experiments/exp4_multiclass/run_length_sensitivity.py
+# Tables 2 (Italian), 4 and 6, and the frequency bands
+python experiments/exp8_combined_features/run_italian.py      # 67.1 / 79.7 / 81.8
+python experiments/exp4_multiclass/run_length_sensitivity.py  # 61.3/57.8 -> 99.7/100.0
 python experiments/exp7_waterfall/probe_discriminative_features.py
-python experiments/exp7_waterfall/analyze_frequency_bands.py
+                                                              # vocabulary diversity R2 0.77
+python experiments/exp7_waterfall/analyze_frequency_bands.py  # 500-2000 band highest, 77.6%
 
 # Pairwise attribution and error analysis
-python experiments/exp2_binary_pairs/run.py
+python experiments/exp2_binary_pairs/run.py                   # mean over 406 pairs 89.6%
 python experiments/exp2_binary_pairs/analyze_method_differences.py
-python experiments/exp4_multiclass/analyze_errors_comparison.py   # 39% error overlap
-python experiments/exp7_waterfall/test_nonlinear_tiers.py         # linear vs kernel
+                                                              # per-poem 93.8% / 94.5%
+python experiments/exp4_multiclass/analyze_errors_comparison.py
+                                                              # error overlap 39%, TTR -0.16
+python experiments/exp7_waterfall/test_nonlinear_tiers.py     # kernel 47.8% vs linear 4.3%
 ```
 
 ### Stage 4 — needs the full download or hours of compute
@@ -107,14 +119,19 @@ python experiments/exp7_waterfall/test_nonlinear_tiers.py         # linear vs ke
 ```bash
 python download_data.py --all        # all embedding models, ~896 MB
 
-# Figure 1 compares seven models; the Qwen3-8B waterfall columns of Table 3
-python experiments/exp8a_multi_model_comparison/run.py
-python experiments/exp8a_multi_model_comparison/run_italian.py
-python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
-python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
+# Figure 1 compares seven models
+python experiments/exp8a_multi_model_comparison/run.py           # Gemini highest, 61.3%
+python experiments/exp8a_multi_model_comparison/run_italian.py   # Gemini highest, 67.1%
 
-# Italian pairwise analysis: 1,326 author pairs, allow 2-3 hours
+# The Qwen3-8B columns of Table 3 -- the only place a model must be named
+python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
+                                                                 # 50.7 -> 3.8%
+python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
+                                                                 # 57.6 -> 9.4%
+
+# Italian pairwise: 1,326 author pairs, allow 2-3 hours
 python experiments/exp2_binary_pairs/analyze_method_differences_italian.py
+                                                                 # per-poem 96.1% / 98.5%
 python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
 ```
 
@@ -208,23 +225,19 @@ through the main analysis.
 ### Table 3: Waterfall Residualization (Main Result)
 
 ```bash
-# Russian corpus with Gemini embeddings
-python experiments/exp7_waterfall/run_extended.py --embedding-model gemini
+# Russian corpus, Gemini embeddings (the default)
+python experiments/exp7_waterfall/run_extended.py
 
-# Russian corpus with Qwen3-8B embeddings
+# Italian corpus, Gemini embeddings (the default)
+python experiments/exp7_waterfall/run_italian_extended.py
+
+# The same two with Qwen3-8B instead (needs `download_data.py --all`)
 python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
-
-# Italian corpus with Gemini embeddings
-python experiments/exp7_waterfall/run_italian_extended.py --embedding-model gemini
-
-# Italian corpus with Qwen3-8B embeddings
 python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
 ```
 
-**Note**: the two `--embedding-model qwen8b` commands need the Qwen3-8B
-embeddings, which `download_data.py --minimal` does not fetch. Run
-`python download_data.py --all` first, or skip them — the Gemini columns
-reproduce the main result on their own.
+The Qwen3-8B pair is optional: the Gemini columns reproduce the main result on
+their own, and they run on the `--minimal` download.
 
 Pre-computed results: `experiments/exp7_waterfall/results/`
 
