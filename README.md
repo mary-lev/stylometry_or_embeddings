@@ -94,9 +94,15 @@ See `requirements.txt` for full dependencies.
 ### Figure 1: Embedding Model Comparison
 
 ```bash
+python download_data.py --all      # this comparison needs every model
 python experiments/exp8a_multi_model_comparison/run.py
 python experiments/exp8a_multi_model_comparison/run_italian.py
 ```
+
+**Note**: this is the one experiment that needs more than `--minimal`. With
+only the Gemini embeddings downloaded it still runs, but compares a single
+model and says so loudly; the figure then shows one bar instead of the table
+below.
 
 Pre-computed results: `experiments/exp8a_multi_model_comparison/results/`
 
@@ -134,6 +140,11 @@ python experiments/exp7_waterfall/run_italian_extended.py --embedding-model gemi
 # Italian corpus with Qwen3-8B embeddings
 python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
 ```
+
+**Note**: the two `--embedding-model qwen8b` commands need the Qwen3-8B
+embeddings, which `download_data.py --minimal` does not fetch. Run
+`python download_data.py --all` first, or skip them — the Gemini columns
+reproduce the main result on their own.
 
 Pre-computed results: `experiments/exp7_waterfall/results/`
 

@@ -260,13 +260,15 @@ def main():
     print("ANALYZING ALL EMBEDDING MODELS")
     print("=" * 80)
 
+    skipped = []
     for model_name, config in MODELS.items():
         print(f"\n[{model_name}] ({config['type']}, {config['dims']}d)")
 
         # Load embeddings
         emb_file = DATA_DIR / config['file']
         if not emb_file.exists():
-            print(f"  WARNING: File not found: {emb_file}")
+            print(f"  SKIPPED: {emb_file} not downloaded")
+            skipped.append(model_name)
             continue
 
         embeddings = np.load(emb_file)
@@ -284,6 +286,15 @@ def main():
         print(f"  Combined: {results['combined']['acc']:.1%} (+{results['combined']['acc'] - acc_baseline:.1%} vs stylometry)")
         print(f"  Var explained by stylometry: {results['var_explained_by_styl']:.1%}")
         print(f"  Residual emb: {results['residual_emb']['acc']:.1%} ({results['residual_emb']['acc']/chance:.1f}× chance)")
+
+    if skipped:
+        print("\n" + "!" * 78)
+        print(f"WARNING: {len(skipped)} of {len(MODELS)} models were skipped "
+              f"(embeddings not downloaded):")
+        print("  " + ", ".join(skipped))
+        print("Results and figures below cover only the models present. For the")
+        print("full comparison run:  python download_data.py --all")
+        print("!" * 78)
 
     # Save results
     results_file = RESULTS_DIR / "multi_model_results_italian.json"
