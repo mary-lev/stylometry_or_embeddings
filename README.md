@@ -37,17 +37,18 @@ pip install -r requirements.txt
 # Get the data from Zenodo (~251 MB) and verify it
 python download_data.py
 
-# Reproduce two published results in a couple of seconds
+# Confirm the setup: both re-derive a published result from the shipped
+# artifacts, so they exercise the data and the code without recomputing
 python experiments/exp7_waterfall/run_permutation_test.py
 python experiments/exp10_embedding_structure/run_ablation.py
 ```
 
-`download_data.py` downloads whatever is missing and then checksums every
-file, so it is also the way to confirm an existing download. It is safe to
-re-run: files already on disk are checked, not fetched again.
+If those commands succeed, the installation is correct.
 
-If those three commands succeed, the installation is correct. The section
-below reproduces the paper, table by table.
+Reproducing the paper in full is the next section. Expect roughly six hours
+end to end, most of it in two long runs (the Italian waterfall and the Italian
+pairwise analysis); individual tables can be reproduced on their own in
+minutes.
 
 ---
 
@@ -123,9 +124,9 @@ running anything.
 | Table 2 — stylometry methods | `exp0_stylometry_baseline/run.py` | 15 min |
 | Table 3 — embeddings vs stylometry | `exp8_combined_features/run.py`, `run_italian.py` | 20 min |
 | Figures 2–3 — combined comparison | `exp8a_multi_model_comparison/visualize.py`, `visualize_italian.py` | 5 s · needs `--all` |
-| §Binary Attribution | `exp2_binary_pairs/run.py`, `analyze_method_differences.py` | 30 min |
+| §Binary Attribution | `exp4_multiclass/run.py`, `exp2_binary_pairs/run.py`, `run_italian.py`, `analyze_method_differences.py` | 1 h |
 | Table 4 — text length | `exp4_multiclass/run_length_sensitivity.py` | 10 min |
-| Figure 4 — error by length | `exp2_binary_pairs/plot_binary_error_by_length.py` | 5 s |
+| Figure 4 — error by length | `exp2_binary_pairs/analyze_method_differences_italian.py`, then `plot_binary_error_by_length.py` | 2–3 h |
 | Table 5 — residualization waterfall | `exp7_waterfall/run_extended.py`, `run_italian_extended.py` | 50 min |
 | Figures 5–6 — waterfall | `exp7_waterfall/make_waterfall_figures.py` | 2 s |
 | §Permutation test | `exp7_waterfall/run_permutation_test.py` | 2 s |
@@ -266,8 +267,10 @@ The stylometry column here is char 3-grams alone, which is why 1 poem reads
 
 #### Figure 4 — Binary error by text length
 
+The Russian half comes from the §Binary Attribution run above. The figure has
+an Italian panel too, which needs the Italian pairwise analysis:
+
 ```bash
-python experiments/exp2_binary_pairs/analyze_method_differences.py
 python experiments/exp2_binary_pairs/analyze_method_differences_italian.py   # 2-3 h
 python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
 ```
