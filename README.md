@@ -34,14 +34,94 @@ cd stylometry_or_embeddings
 # Install dependencies
 pip install -r requirements.txt
 
-# Download data from Zenodo (embeddings + poems + linguistic features, ~251 MB for minimal)
-python download_data.py --minimal    # Required files only
-# OR
-python download_data.py --all        # All embedding models (~896 MB)
+# Download data from Zenodo (embeddings + poems + linguistic features, ~251 MB)
+python download_data.py --minimal
 
-# Run main waterfall experiment
-python experiments/exp7_waterfall/run_extended.py --embedding-model gemini
+# Check the download, then reproduce three published results in a few seconds
+python download_data.py --verify
+python experiments/exp7_waterfall/run_permutation_test.py
+python experiments/exp10_embedding_structure/run_ablation.py
 ```
+
+If those four commands succeed, the installation is correct. The section below
+runs the actual experiments, shortest first.
+
+---
+
+## Reproduction Sequence
+
+Commands are grouped by cost so you can stop at any stage. Everything in
+stages 1–3 runs on the `--minimal` download; only stage 4 needs more.
+
+Timings are from one 20-core machine and are indicative, not guarantees.
+
+### Stage 1 — verify (seconds, no computation)
+
+These re-derive published numbers from the results files in the repository.
+Nothing is recomputed, so they are the fastest way to confirm the repository
+is intact.
+
+```bash
+python download_data.py --verify                                  # checksums
+python experiments/exp7_waterfall/run_permutation_test.py         # Russian
+python experiments/exp7_waterfall/run_permutation_test.py --language italian
+python experiments/exp10_embedding_structure/run_ablation.py      # perturbation
+python experiments/exp7_waterfall/make_waterfall_figures.py       # 2 figures
+```
+
+### Stage 2 — fast experiments (a few minutes each)
+
+```bash
+python experiments/exp5_interpretability/run.py                   # Table 7
+python experiments/exp5_interpretability/run_cross_topic.py       # Table 8
+python experiments/exp8_combined_features/run.py                  # Table 2 (RU)
+python experiments/exp8_combined_features/analyze_residualization.py
+python experiments/exp4_multiclass/run.py                         # confusion matrix
+python experiments/exp2_binary_pairs/run_italian.py               # Italian pairwise
+```
+
+### Stage 3 — main results (10–40 minutes each)
+
+Run these in the order given; the last two depend on the ones above them.
+
+```bash
+# Table 3, the main result (Italian is the slowest at ~40 min)
+python experiments/exp7_waterfall/run_extended.py --embedding-model gemini
+python experiments/exp7_waterfall/run_italian_extended.py --embedding-model gemini
+
+# Table 2 (Italian), Table 4, Table 6, frequency bands
+python experiments/exp8_combined_features/run_italian.py
+python experiments/exp4_multiclass/run_length_sensitivity.py
+python experiments/exp7_waterfall/probe_discriminative_features.py
+python experiments/exp7_waterfall/analyze_frequency_bands.py
+
+# Pairwise attribution and error analysis
+python experiments/exp2_binary_pairs/run.py
+python experiments/exp2_binary_pairs/analyze_method_differences.py
+python experiments/exp4_multiclass/analyze_errors_comparison.py   # 39% error overlap
+python experiments/exp7_waterfall/test_nonlinear_tiers.py         # linear vs kernel
+```
+
+### Stage 4 — needs the full download or hours of compute
+
+```bash
+python download_data.py --all        # all embedding models, ~896 MB
+
+# Figure 1 compares seven models; the Qwen3-8B waterfall columns of Table 3
+python experiments/exp8a_multi_model_comparison/run.py
+python experiments/exp8a_multi_model_comparison/run_italian.py
+python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
+python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
+
+# Italian pairwise analysis: 1,326 author pairs, allow 2-3 hours
+python experiments/exp2_binary_pairs/analyze_method_differences_italian.py
+python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
+```
+
+Two further options exist but are **not needed** to reproduce anything: 
+`run_permutation_test.py --recompute` (~3.5 h Russian, ~7 h Italian) and
+`run_ablation.py --regenerate` (calls a paid API). Stage 1 reproduces both
+results from the published artifacts.
 
 ---
 
@@ -421,34 +501,21 @@ python experiments/exp10_embedding_structure/run_ablation.py --dry-run
 
 ### Regenerating the Figures
 
-Every figure in `figures/` is generated from the results files, not hand-edited.
-Run the corresponding experiment first, then its plotting script:
+Every figure in `figures/` is generated from a results file, not hand-edited.
+Each plotting script reads the results of the experiment above it in the
+Reproduction Sequence, and names the missing command if you run it too early.
 
-```bash
-# Figure 1: embedding model comparison
-python experiments/exp8a_multi_model_comparison/run.py
-python experiments/exp8a_multi_model_comparison/visualize_model_comparison.py
-
-# Embeddings + stylometry combination (Russian and Italian)
-python experiments/exp8a_multi_model_comparison/visualize.py
-python experiments/exp8a_multi_model_comparison/visualize_italian.py
-
-# Waterfall figures (Gemini and Qwen3-8B, both languages)
-python experiments/exp7_waterfall/run_extended.py --embedding-model gemini
-python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
-python experiments/exp7_waterfall/run_italian_extended.py --embedding-model gemini
-python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
-python experiments/exp7_waterfall/make_waterfall_figures.py
-
-# Binary attribution error by text length
-python experiments/exp2_binary_pairs/analyze_method_differences.py
-python experiments/exp2_binary_pairs/analyze_method_differences_italian.py
-python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
-```
+| Figure | Plotting script | Needs |
+|--------|-----------------|-------|
+| `waterfall_figure.png`, `waterfall_figure_qwen.png` | `exp7_waterfall/make_waterfall_figures.py` | ships with results — runs immediately |
+| `embedding_model_comparison.png` | `exp8a_multi_model_comparison/visualize_model_comparison.py` | stage 4 `exp8a/run.py` |
+| `combined_comparison.png`, `combined_comparison_italian.png` | `exp8a_multi_model_comparison/visualize{,_italian}.py` | stage 4 `exp8a/run{,_italian}.py` |
+| `binary_fig2_error_by_length.png` | `exp2_binary_pairs/plot_binary_error_by_length.py` | stage 3 + 4 `analyze_method_differences{,_italian}.py` |
 
 **Note on Qwen-0.6B**: Figure 1 includes a seventh model, Qwen3-Embedding-0.6B,
-whose embeddings are **not** part of the Zenodo release. `run.py` skips it
-automatically when the file is absent, producing the six-model figure instead.
+whose embeddings are **not** part of the Zenodo release. `exp8a/run.py` skips it
+automatically when the file is absent and reports which models were skipped,
+producing the six-model figure instead.
 
 ---
 
