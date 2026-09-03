@@ -34,31 +34,34 @@ cd stylometry_or_embeddings
 # Install dependencies
 pip install -r requirements.txt
 
-# Download data from Zenodo (embeddings + poems + linguistic features, ~251 MB)
-python download_data.py --minimal
+# Get the data from Zenodo (~251 MB) and verify it
+python download_data.py
 
-# Check the download, then reproduce three published results in a few seconds
-python download_data.py --verify
+# Reproduce two published results in a couple of seconds
 python experiments/exp7_waterfall/run_permutation_test.py
 python experiments/exp10_embedding_structure/run_ablation.py
 ```
 
-If those four commands succeed, the installation is correct. The section below
-runs the actual experiments, shortest first.
+`download_data.py` downloads whatever is missing and then checksums every
+file, so it is also the way to confirm an existing download. It is safe to
+re-run: files already on disk are checked, not fetched again.
+
+If those three commands succeed, the installation is correct. The section
+below runs the actual experiments, shortest first.
 
 ---
 
 ## Reproduction Sequence
 
-Commands are grouped by cost so you can stop at any stage. Everything in
-stages 1–3 runs on the `--minimal` download; only stage 4 needs more.
+Commands are grouped by cost so you can stop at any stage. Stages 1–3 run on
+the default download from Quick Start; only stage 4 needs more data.
 
 **Nearly every command runs as written, with no arguments.** Defaults are the
 published settings: Russian, Gemini embeddings, 200 poems per author, seed 42,
-5-fold CV. Stages 2 and 3 are argument-free entirely. Arguments appear in only
-four places, each selecting something genuinely different: `--verify` and
-`--all` for the downloader, `--language italian` for the Italian permutation
-test, and `--embedding-model qwen8b` for the two Qwen3-8B waterfall columns.
+5-fold CV. Stages 2 and 3 are argument-free entirely; stage 1 has one argument
+and stage 4 has three, each selecting something genuinely different —
+`--language italian` for the Italian permutation test, `--all` for the extra
+embeddings, and `--embedding-model qwen8b` for the two Qwen3-8B columns.
 
 The comment after each command is the headline number it should print, so you
 can check as you go. Full expected output for each is in *Reproducing Results*
@@ -68,10 +71,10 @@ below. Timings are from one 20-core machine and are indicative.
 
 These re-derive published numbers from the results files already in the
 repository. Nothing is recomputed, so this is the fastest way to confirm the
-download and installation are sound.
+installation is sound. (The data itself was already checksummed by
+`download_data.py` in Quick Start.)
 
 ```bash
-python download_data.py --verify                              # 6 files OK
 python experiments/exp7_waterfall/run_permutation_test.py     # RU: not above chance
 python experiments/exp7_waterfall/run_permutation_test.py --language italian
                                                               # IT: above chance, p<0.001
@@ -148,12 +151,15 @@ results from the published artifacts.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18260458.svg)](https://doi.org/10.5281/zenodo.18260458)
 
-The `download_data.py` script automatically downloads and verifies all required files:
+`download_data.py` fetches what the experiments need and checksums every file
+afterwards. Re-running it is how you confirm an existing download; nothing is
+fetched twice.
 
 ```bash
-python download_data.py --minimal    # Required files only (~251 MB)
-python download_data.py --all        # All embedding models (~896 MB)
-python download_data.py --verify     # Check existing files
+python download_data.py              # what the experiments need (~251 MB)
+python download_data.py --all        # also the other embedding models (~896 MB)
+python download_data.py --verify     # check only, download nothing
+python download_data.py --force      # re-download even if files are present
 ```
 
 See `data/README.md` for detailed documentation.
@@ -196,7 +202,8 @@ python experiments/exp8a_multi_model_comparison/run.py
 python experiments/exp8a_multi_model_comparison/run_italian.py
 ```
 
-**Note**: this is the one experiment that needs more than `--minimal`. With
+**Note**: this is the one experiment that needs more than the default
+download. With
 only the Gemini embeddings downloaded it still runs, but compares a single
 model and says so loudly; the figure then shows one bar instead of the table
 below.
@@ -237,7 +244,7 @@ python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen
 ```
 
 The Qwen3-8B pair is optional: the Gemini columns reproduce the main result on
-their own, and they run on the `--minimal` download.
+their own, and they run on the default download.
 
 Pre-computed results: `experiments/exp7_waterfall/results/`
 

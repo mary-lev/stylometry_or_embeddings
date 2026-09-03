@@ -6,10 +6,15 @@ This script downloads the embedding files and large data files that are
 hosted on Zenodo due to file size limitations on GitHub.
 
 Usage:
-    python download_data.py              # Download all files
-    python download_data.py --russian    # Download Russian data only
-    python download_data.py --italian    # Download Italian data only
-    python download_data.py --minimal    # Download only Gemini embeddings (recommended for quick start)
+    python download_data.py              # Get what the experiments need, then
+                                         # verify every file's checksum.
+                                         # Safe to re-run: already-downloaded
+                                         # files are checked, not re-fetched.
+    python download_data.py --all        # Also the other embedding models
+    python download_data.py --verify     # Check only, download nothing
+    python download_data.py --force      # Re-download even if files exist
+
+    --russian / --italian restrict any of the above to one corpus.
 """
 
 import os
@@ -200,6 +205,25 @@ def verify_file(filepath: Path, expected_md5: str = None) -> bool:
     return True
 
 
+def verify_all(files, base_dir):
+    """Check every file's checksum. Returns 0 if all good, 1 otherwise."""
+    print("\n[Verifying files...]")
+    all_ok = True
+    for filepath, info in files.items():
+        full_path = base_dir / filepath
+        if verify_file(full_path, info.get("md5")):
+            print(f"  OK: {filepath}")
+        else:
+            print(f"  MISSING/INVALID: {filepath}")
+            all_ok = False
+    if all_ok:
+        print(f"\nAll {len(files)} files present and verified.")
+    else:
+        print("\nSome files are missing or corrupt. Re-run with --force to "
+              "re-download them.")
+    return 0 if all_ok else 1
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Download large data files from Zenodo"
@@ -283,22 +307,15 @@ def main():
     # otherwise a complete-but-corrupt download reports success without any
     # checksum being computed.
     if args.verify:
-        print("\n[Verifying files...]")
-        all_ok = True
-        for filepath, info in files_to_download.items():
-            full_path = base_dir / filepath
-            if verify_file(full_path, info.get("md5")):
-                print(f"  OK: {filepath}")
-            else:
-                print(f"  MISSING/INVALID: {filepath}")
-                all_ok = False
-        return 0 if all_ok else 1
+        return verify_all(files_to_download, base_dir)
 
     if existing and not args.force:
         print(f"\nAlready downloaded: {len(existing)} files")
         if not missing:
-            print("All files present. Use --force to re-download.")
-            return 0
+            # Everything is on disk. Confirm it is intact rather than trusting
+            # that the files exist, then stop -- there is nothing to fetch.
+            print("Nothing to download; checking the files that are here.")
+            return verify_all(files_to_download, base_dir)
 
     # Download missing files
     print(f"\n[Downloading {len(missing)} files...]")
@@ -329,11 +346,12 @@ def main():
         for f in failed:
             print(f"  - {f}")
         return 1
-    else:
-        print("SUCCESS: All files downloaded")
+    print("SUCCESS: All files downloaded")
+    rc = verify_all(files_to_download, base_dir)
+    if rc == 0:
         print("\nYou can now run the experiments:")
         print("  python experiments/exp7_waterfall/run_extended.py")
-        return 0
+    return rc
 
 
 if __name__ == "__main__":
