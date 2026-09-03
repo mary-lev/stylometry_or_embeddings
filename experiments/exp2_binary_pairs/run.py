@@ -87,31 +87,9 @@ def run_with_clean_dataset(n_per_author=100, cv_folds=5, seed=42, embedding_mode
     return results, authors, n_per_author, seed
 
 
-def run_with_corpus(min_poems=100, min_pair_poems=50, fixed_n=None, cv_folds=5, seed=42):
-    """Run experiment using corpus directly (legacy mode).
-
-    Not available in the public release: this path needs the raw unbalanced
-    corpus, which is not distributed. Only the balanced clean dataset is
-    published to Zenodo. See data/README.md.
-    """
-    raise SystemExit(
-        "Legacy corpus mode is not available in the public release: it needs "
-        "the raw unbalanced corpus, which is not distributed. The published "
-        "balanced dataset is used by default."
-    )
-
 
 def main():
     parser = argparse.ArgumentParser(description="EXP2: All-Pairs Binary Classification")
-    parser.add_argument('--use-clean-dataset', action='store_true', default=True,
-                        help='Use the published clean dataset (default; the legacy '
-                             'corpus mode is not available in the public release)')
-    parser.add_argument('--min-poems', type=int, default=100,
-                        help='Minimum poems per author to include (corpus mode)')
-    parser.add_argument('--min-pair-poems', type=int, default=50,
-                        help='Minimum poems per author for pairwise comparison (corpus variable mode)')
-    parser.add_argument('--fixed-n', type=int, default=None,
-                        help='Fixed number of poems per author (corpus fixed mode)')
     parser.add_argument('--cv-folds', type=int, default=5,
                         help='CV folds')
     parser.add_argument('--seed', type=int, default=42,
@@ -125,26 +103,16 @@ def main():
     print("EXPERIMENT 2: All-Pairs Binary Classification")
     print("=" * 60)
 
-    if args.use_clean_dataset:
-        results, authors, n_per_author, seed = run_with_clean_dataset(
-            n_per_author=N_PER_AUTHOR,
-            cv_folds=args.cv_folds,
-            seed=args.seed,
-            embedding_model=args.embedding_model
-        )
-        # Include embedding model in suffix if not openai
-        model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
-        # Name the output after the poems-per-author actually loaded.
-        suffix = f"_clean_n{n_per_author}{model_suffix}"
-    else:
-        results, authors, n_per_author, seed = run_with_corpus(
-            min_poems=args.min_poems,
-            min_pair_poems=args.min_pair_poems,
-            fixed_n=args.fixed_n,
-            cv_folds=args.cv_folds,
-            seed=args.seed
-        )
-        suffix = f"_fixed{args.fixed_n}" if args.fixed_n else "_variable"
+    results, authors, n_per_author, seed = run_with_clean_dataset(
+        n_per_author=N_PER_AUTHOR,
+        cv_folds=args.cv_folds,
+        seed=args.seed,
+        embedding_model=args.embedding_model
+    )
+    # Include embedding model in suffix if not openai
+    model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
+    # Name the output after the poems-per-author actually loaded.
+    suffix = f"_clean_n{n_per_author}{model_suffix}"
 
     print(f"  Completed: {len(results)} pairs")
 
@@ -186,8 +154,8 @@ def main():
     output = {
         'timestamp': datetime.now().isoformat(),
         'settings': {
-            'mode': 'clean_dataset' if args.use_clean_dataset else ('fixed' if args.fixed_n else 'variable'),
-            'embedding_model': args.embedding_model if args.use_clean_dataset else 'openai',
+            'mode': 'clean_dataset',
+            'embedding_model': args.embedding_model,
             'n_per_author': n_per_author,
             'cv_folds': args.cv_folds,
             'seed': seed,

@@ -40,11 +40,6 @@ N_PER_AUTHOR = 200
 
 def main():
     parser = argparse.ArgumentParser(description="EXP4: Multiclass Author Attribution")
-    parser.add_argument('--use-clean-dataset', action='store_true', default=True,
-                        help='Use the published clean dataset (default; the legacy '
-                             'corpus mode is not available in the public release)')
-    parser.add_argument('--min-poems', type=int, default=100,
-                        help='Minimum poems per author (legacy mode)')
     parser.add_argument('--cv-folds', type=int, default=5,
                         help='CV folds')
     parser.add_argument('--seed', type=int, default=42,
@@ -58,43 +53,33 @@ def main():
     print(f"EXPERIMENT 4: Multiclass Author Attribution ({args.embedding_model.upper()})")
     print("=" * 60)
 
-    if args.use_clean_dataset:
-        # Load clean dataset
-        print(f"\n[Loading clean dataset with {args.embedding_model} embeddings...]")
-        from clean_dataset import load_clean_dataset
+    # Load the published clean dataset. The legacy corpus mode was dropped:
+    # it needed the raw unbalanced corpus, which is not distributed.
+    print(f"\n[Loading clean dataset with {args.embedding_model} embeddings...]")
+    from clean_dataset import load_clean_dataset
 
-        data = load_clean_dataset(
-            n_per_author=N_PER_AUTHOR,
-            seed=args.seed,
-            embedding_model=args.embedding_model
-        )
+    data = load_clean_dataset(
+        n_per_author=N_PER_AUTHOR,
+        seed=args.seed,
+        embedding_model=args.embedding_model
+    )
 
-        embeddings = data['embeddings']
-        y = data['labels']
-        unique_authors = data['author_list']
-        author_to_idx = data['author_to_idx']
-        idx_to_author = data['idx_to_author']
+    embeddings = data['embeddings']
+    y = data['labels']
+    unique_authors = data['author_list']
+    author_to_idx = data['author_to_idx']
+    idx_to_author = data['idx_to_author']
 
-        n_authors = len(unique_authors)
-        n_samples = len(y)
-        model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
-        # Name the output after the data actually loaded (the published
-        # dataset is fixed at 200 per author), never the requested value.
-        suffix = f"_clean_n{data['metadata']['n_per_author']}{model_suffix}"
-    else:
-        # Legacy corpus mode operated on the unbalanced source corpus, which is
-        # not part of the public release (only the balanced clean dataset is
-        # published to Zenodo). See data/README.md.
-        raise SystemExit(
-            "Legacy corpus mode is not available in the public release: it needs "
-            "the raw unbalanced corpus, which is not distributed. The published "
-            "balanced dataset is used by default."
-        )
+    n_authors = len(unique_authors)
+    n_samples = len(y)
+    model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
+    # Name the output after the data actually loaded.
+    suffix = f"_clean_n{data['metadata']['n_per_author']}{model_suffix}"
 
     chance_level = 1 / n_authors
 
     print(f"\n[Settings]")
-    print(f"  Dataset: {'clean' if args.use_clean_dataset else 'legacy'}")
+    print(f"  Dataset: clean")
     print(f"  Embedding model: {args.embedding_model}")
     print(f"  Embedding dims: {embeddings.shape[1]}")
     print(f"  Authors: {n_authors}")
@@ -188,7 +173,7 @@ def main():
     results = {
         'timestamp': datetime.now().isoformat(),
         'settings': {
-            'dataset': 'clean' if args.use_clean_dataset else 'legacy',
+            'dataset': 'clean',
             'embedding_model': args.embedding_model,
             'embedding_dim': embeddings.shape[1],
             'n_authors': n_authors,
