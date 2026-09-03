@@ -32,14 +32,17 @@ warnings.filterwarnings('ignore', category=UserWarning)
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 
 def main():
     parser = argparse.ArgumentParser(description="EXP4: Multiclass Author Attribution")
     parser.add_argument('--use-clean-dataset', action='store_true', default=True,
                         help='Use the published clean dataset (default; the legacy '
                              'corpus mode is not available in the public release)')
-    parser.add_argument('--n-per-author', type=int, default=200,
-                        help='Poems per author (100 or 200 for clean dataset)')
     parser.add_argument('--min-poems', type=int, default=100,
                         help='Minimum poems per author (legacy mode)')
     parser.add_argument('--cv-folds', type=int, default=5,
@@ -61,7 +64,7 @@ def main():
         from clean_dataset import load_clean_dataset
 
         data = load_clean_dataset(
-            n_per_author=args.n_per_author,
+            n_per_author=N_PER_AUTHOR,
             seed=args.seed,
             embedding_model=args.embedding_model
         )
@@ -75,7 +78,9 @@ def main():
         n_authors = len(unique_authors)
         n_samples = len(y)
         model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
-        suffix = f"_clean_n{args.n_per_author}{model_suffix}"
+        # Name the output after the data actually loaded (the published
+        # dataset is fixed at 200 per author), never the requested value.
+        suffix = f"_clean_n{data['metadata']['n_per_author']}{model_suffix}"
     else:
         # Legacy corpus mode operated on the unbalanced source corpus, which is
         # not part of the public release (only the balanced clean dataset is
@@ -93,7 +98,7 @@ def main():
     print(f"  Embedding model: {args.embedding_model}")
     print(f"  Embedding dims: {embeddings.shape[1]}")
     print(f"  Authors: {n_authors}")
-    print(f"  Poems per author: {args.n_per_author}")
+    print(f"  Poems per author: {data['metadata']['n_per_author']}")
     print(f"  Total samples: {n_samples}")
     print(f"  CV folds: {args.cv_folds}")
     print(f"  Chance level: {chance_level:.1%}")
@@ -187,7 +192,7 @@ def main():
             'embedding_model': args.embedding_model,
             'embedding_dim': embeddings.shape[1],
             'n_authors': n_authors,
-            'n_per_author': args.n_per_author,
+            'n_per_author': data['metadata']['n_per_author'],
             'total_samples': n_samples,
             'cv_folds': args.cv_folds,
             'seed': args.seed,

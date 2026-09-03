@@ -45,6 +45,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 # Russian function words (common grammatical words) - deduplicated
 RUSSIAN_FUNCTION_WORDS = list(set([
     # Pronouns
@@ -235,8 +240,6 @@ def run_pairwise_classification(X, y, authors, cv_folds=5):
 
 def main():
     parser = argparse.ArgumentParser(description="EXP0: Classical Stylometry Baseline")
-    parser.add_argument('--n-per-author', type=int, default=200,
-                        help='Poems per author (match clean dataset)')
     parser.add_argument('--cv-folds', type=int, default=5,
                         help='CV folds')
     parser.add_argument('--seed', type=int, default=42,
@@ -255,7 +258,7 @@ def main():
     print("\n[Loading clean dataset...]")
     from clean_dataset import load_clean_dataset
 
-    data = load_clean_dataset(n_per_author=args.n_per_author, seed=args.seed, include_poems=True)
+    data = load_clean_dataset(n_per_author=N_PER_AUTHOR, seed=args.seed, include_poems=True)
 
     texts = [p['text'] for p in data['poems']]
     labels = data['labels']
@@ -267,7 +270,7 @@ def main():
 
     print(f"  Authors: {n_authors}")
     print(f"  Samples: {n_samples}")
-    print(f"  Poems per author: {args.n_per_author}")
+    print(f"  Poems per author: {N_PER_AUTHOR}")
     print(f"  Chance level: {chance:.1%}")
 
     # Results storage
@@ -277,7 +280,7 @@ def main():
         'settings': {
             'n_authors': n_authors,
             'n_samples': n_samples,
-            'n_per_author': args.n_per_author,
+            'n_per_author': N_PER_AUTHOR,
             'cv_folds': args.cv_folds,
             'seed': args.seed,
             'chance_level': chance
@@ -438,7 +441,7 @@ def main():
                 'settings': {
                     'mode': 'stylometry',
                     'feature_type': method_name,
-                    'n_per_author': args.n_per_author,
+                    'n_per_author': N_PER_AUTHOR,
                     'cv_folds': args.cv_folds,
                     'seed': args.seed,
                     'n_authors': n_authors,
@@ -455,7 +458,7 @@ def main():
                 'top_similar': sorted_pairs[:10],
                 'top_different': sorted_pairs[-10:][::-1]
             }
-            pairwise_file = RESULTS_DIR / f"pairwise_stylometry_{method_name}_n{args.n_per_author}.json"
+            pairwise_file = RESULTS_DIR / f"pairwise_stylometry_{method_name}_n{N_PER_AUTHOR}.json"
             with open(pairwise_file, 'w', encoding='utf-8') as f:
                 json.dump(pairwise_output, f, indent=2, ensure_ascii=False)
             print(f"  Saved to: {pairwise_file.name}")
@@ -470,7 +473,7 @@ def main():
             print(f"{method_name:<20} {mdata['mean_accuracy']:>9.1%} {mdata['min_accuracy']:>7.1%} {mdata['max_accuracy']:>7.1%}")
 
     # Save results
-    output_file = RESULTS_DIR / f"stylometry_results_n{args.n_per_author}.json"
+    output_file = RESULTS_DIR / f"stylometry_results_n{N_PER_AUTHOR}.json"
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"\nResults saved to: {output_file}")

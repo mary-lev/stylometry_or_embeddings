@@ -34,6 +34,11 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 
@@ -169,8 +174,6 @@ def main():
     parser.add_argument('--embedding-model', type=str, default='gemini',
                         choices=['openai', 'gemini', 'qwen8b', 'qwen-8b'],
                         help='Embedding model')
-    parser.add_argument('--n-per-author', type=int, default=200,
-                        help='Poems per author')
     parser.add_argument('--cv-folds', type=int, default=5,
                         help='CV folds')
     parser.add_argument('--seed', type=int, default=42,
@@ -188,14 +191,14 @@ def main():
     print(f"\n[Loading {args.language} data...]")
     if args.language == 'russian':
         texts, embeddings, labels, author_list = load_russian_data(
-            n_per_author=args.n_per_author,
+            n_per_author=N_PER_AUTHOR,
             seed=args.seed,
             embedding_model=args.embedding_model
         )
         embedding_model = args.embedding_model
     else:
         texts, embeddings, labels, author_list = load_italian_data(
-            n_per_author=args.n_per_author,
+            n_per_author=N_PER_AUTHOR,
             seed=args.seed,
             embedding_model=args.embedding_model
         )
@@ -226,7 +229,7 @@ def main():
         'settings': {
             'n_authors': n_authors,
             'n_samples': n_samples,
-            'n_per_author': args.n_per_author,
+            'n_per_author': N_PER_AUTHOR,
             'cv_folds': args.cv_folds,
             'seed': args.seed,
             'alpha': args.alpha,

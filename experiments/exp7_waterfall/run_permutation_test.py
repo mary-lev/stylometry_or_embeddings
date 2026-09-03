@@ -51,6 +51,11 @@ warnings.filterwarnings('ignore')
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 
 class CharNgramExtractor:
     """Character n-gram feature extractor."""
@@ -467,8 +472,6 @@ def main():
                         help='Language to test (default: russian)')
     parser.add_argument('--n-permutations', type=int, default=1000,
                         help='Number of permutations (default: 1000)')
-    parser.add_argument('--n-per-author', type=int, default=200,
-                        help='Poems per author (default: 200)')
     parser.add_argument('--seed', type=int, default=42,
                         help='Random seed')
     parser.add_argument('--embedding-model', type=str, default='gemini',
@@ -500,7 +503,7 @@ def main():
 
     if args.language == 'russian':
         data = load_clean_dataset(
-            n_per_author=args.n_per_author,
+            n_per_author=N_PER_AUTHOR,
             seed=args.seed,
             include_poems=True,
             embedding_model=args.embedding_model
@@ -511,7 +514,7 @@ def main():
         # Italian - import from run_italian_extended.py
         from run_italian_extended import load_italian_dataset
         data = load_italian_dataset(
-            n_per_author=args.n_per_author,
+            n_per_author=N_PER_AUTHOR,
             seed=args.seed
         )
         tier_order = ['tier1', 'tier2', 'tier3', 'tier5', 'tier6']  # No tier4 (prosody)

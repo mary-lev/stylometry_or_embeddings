@@ -33,6 +33,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 # Russian function words
 RUSSIAN_FUNCTION_WORDS = list(set([
     'я', 'ты', 'он', 'она', 'оно', 'мы', 'вы', 'они',
@@ -133,8 +138,6 @@ def run_pairwise(X, y, authors, cv_folds=5, seed=42):
 
 def main():
     parser = argparse.ArgumentParser(description="EXP8: Combined Features")
-    parser.add_argument('--n-per-author', type=int, default=200,
-                        help='Poems per author')
     parser.add_argument('--cv-folds', type=int, default=5,
                         help='CV folds')
     parser.add_argument('--seed', type=int, default=42,
@@ -157,7 +160,7 @@ def main():
     from clean_dataset import load_clean_dataset
 
     data = load_clean_dataset(
-        n_per_author=args.n_per_author,
+        n_per_author=N_PER_AUTHOR,
         seed=args.seed,
         include_poems=True,
         embedding_model=args.embedding_model
@@ -204,7 +207,7 @@ def main():
         'settings': {
             'n_authors': n_authors,
             'n_samples': n_samples,
-            'n_per_author': args.n_per_author,
+            'n_per_author': N_PER_AUTHOR,
             'cv_folds': args.cv_folds,
             'seed': args.seed,
             'chance_level': chance,
@@ -317,7 +320,7 @@ def main():
 
     # Save results
     model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
-    output_file = RESULTS_DIR / f"combined_results_n{args.n_per_author}{model_suffix}.json"
+    output_file = RESULTS_DIR / f"combined_results_n{N_PER_AUTHOR}{model_suffix}.json"
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"\nResults saved to: {output_file}")

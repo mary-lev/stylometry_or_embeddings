@@ -40,6 +40,11 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 # Italian POS tags (Universal Dependencies)
 POS_TAGS = ['NOUN', 'VERB', 'ADJ', 'ADV', 'PRON', 'DET', 'ADP', 'CCONJ',
             'SCONJ', 'PART', 'INTJ', 'NUM', 'PUNCT', 'SYM', 'X', 'PROPN', 'AUX']
@@ -479,7 +484,6 @@ def run_waterfall_cv(poems, embeddings, y, tier_order, n_authors, n_folds=5, see
 
 def main():
     parser = argparse.ArgumentParser(description="EXP7 EXTENDED (Italian): Waterfall with Stylometry Tiers")
-    parser.add_argument('--n-per-author', type=int, default=200)
     parser.add_argument('--n-folds', type=int, default=5)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--embedding-model', type=str, default='gemini',
@@ -497,7 +501,7 @@ def main():
 
     # Load Italian dataset
     print(f"\n[Loading Italian dataset with {args.embedding_model} embeddings...]")
-    data = load_italian_dataset(n_per_author=args.n_per_author, seed=args.seed,
+    data = load_italian_dataset(n_per_author=N_PER_AUTHOR, seed=args.seed,
                                  embedding_model=args.embedding_model)
 
     poems = data['poems']
@@ -511,7 +515,7 @@ def main():
     print(f"\n[Settings]")
     print(f"  Language: Italian")
     print(f"  Authors: {n_authors}")
-    print(f"  Poems per author: {args.n_per_author}")
+    print(f"  Poems per author: {N_PER_AUTHOR}")
     print(f"  Total samples: {n_samples}")
     print(f"  CV folds: {args.n_folds}")
     print(f"  Embedding model: {args.embedding_model}")
@@ -526,7 +530,7 @@ def main():
         'language': 'italian',
         'settings': {
             'n_authors': n_authors,
-            'n_per_author': args.n_per_author,
+            'n_per_author': N_PER_AUTHOR,
             'total_samples': n_samples,
             'n_folds': args.n_folds,
             'seed': args.seed,

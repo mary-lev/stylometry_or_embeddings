@@ -5,8 +5,8 @@ EXPERIMENT 2: All-Pairs Binary Classification
 Purpose: RQ1 - Can embeddings distinguish authors? Create complete stylistic distance matrix.
 
 Method:
-1. For each author pair (741 pairs from 39 authors):
-   - Use balanced data (100 poems per author from clean dataset)
+1. For each author pair (406 pairs from 29 Russian authors):
+   - Use balanced data (200 poems per author from the clean dataset)
    - Run 5-fold CV classification on embeddings
    - Record accuracy
 2. Convert accuracy to distance: distance = 2 * (accuracy - 0.5)
@@ -29,6 +29,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 # Constants
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
+
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
 
 
 def classify_pair(embeddings, labels, cv_folds=5):
@@ -101,8 +106,6 @@ def main():
     parser.add_argument('--use-clean-dataset', action='store_true', default=True,
                         help='Use the published clean dataset (default; the legacy '
                              'corpus mode is not available in the public release)')
-    parser.add_argument('--n-per-author', type=int, default=100,
-                        help='Poems per author for clean dataset (100 or 200)')
     parser.add_argument('--min-poems', type=int, default=100,
                         help='Minimum poems per author to include (corpus mode)')
     parser.add_argument('--min-pair-poems', type=int, default=50,
@@ -124,14 +127,17 @@ def main():
 
     if args.use_clean_dataset:
         results, authors, n_per_author, seed = run_with_clean_dataset(
-            n_per_author=args.n_per_author,
+            n_per_author=N_PER_AUTHOR,
             cv_folds=args.cv_folds,
             seed=args.seed,
             embedding_model=args.embedding_model
         )
         # Include embedding model in suffix if not openai
         model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
-        suffix = f"_clean_n{args.n_per_author}{model_suffix}"
+        # Name the output after the poems-per-author actually loaded, not the
+        # requested value: the published dataset is fixed at 200 per author, so
+        # --n-per-author cannot change it and must not mislabel the results.
+        suffix = f"_clean_n{n_per_author}{model_suffix}"
     else:
         results, authors, n_per_author, seed = run_with_corpus(
             min_poems=args.min_poems,

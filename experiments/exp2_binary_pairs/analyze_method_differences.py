@@ -35,6 +35,11 @@ from clean_dataset import load_clean_dataset
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 
 class StyleometryExtractor:
     """Extract stylometry features (char n-grams + word n-grams)."""
@@ -101,7 +106,6 @@ def get_stylometry_predictions_for_pair(texts, labels, cv_folds=5, seed=42):
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze Method Differences")
-    parser.add_argument('--n-per-author', type=int, default=200)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--cv-folds', type=int, default=5)
     parser.add_argument('--embedding-model', type=str, default='gemini',
@@ -117,7 +121,7 @@ def main():
     # Load dataset
     print(f"\n[Loading dataset with {args.embedding_model} embeddings...]")
     data = load_clean_dataset(
-        n_per_author=args.n_per_author,
+        n_per_author=N_PER_AUTHOR,
         seed=args.seed,
         include_poems=True,
         embedding_model=args.embedding_model
@@ -371,7 +375,7 @@ def main():
     output = {
         'timestamp': datetime.now().isoformat(),
         'settings': {
-            'n_per_author': args.n_per_author,
+            'n_per_author': N_PER_AUTHOR,
             'n_authors': n_authors,
             'n_pairs': n_pairs,
             'embedding_model': args.embedding_model

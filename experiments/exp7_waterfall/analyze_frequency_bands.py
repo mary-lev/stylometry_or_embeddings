@@ -37,6 +37,11 @@ warnings.filterwarnings('ignore')
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 # Frequency bands as per Rybicki & Eder
 BANDS = {
     'band_1_100': (0, 100),      # Grammar, syntax
@@ -168,7 +173,6 @@ def categorize_word(word, word_counts, total_vocab_size):
 
 def main():
     parser = argparse.ArgumentParser(description="Frequency Band Analysis")
-    parser.add_argument('--n-per-author', type=int, default=200)
     parser.add_argument('--seed', type=int, default=42)
     args = parser.parse_args()
 
@@ -179,7 +183,7 @@ def main():
     # Load data
     print(f"\n[Loading dataset...]")
     data = load_clean_dataset(
-        n_per_author=args.n_per_author,
+        n_per_author=N_PER_AUTHOR,
         seed=args.seed,
         include_poems=True,
         embedding_model='gemini'

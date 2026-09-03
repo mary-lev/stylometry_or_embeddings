@@ -40,6 +40,11 @@ warnings.filterwarnings('ignore')
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 
 # ============================================================================
 # Feature Extraction: Char N-gram Patterns
@@ -208,7 +213,6 @@ def probe_feature(embeddings, feature_values, feature_name, n_folds=5):
 
 def main():
     parser = argparse.ArgumentParser(description="Probe Embeddings for Discriminative Features")
-    parser.add_argument('--n-per-author', type=int, default=200)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--embedding-model', type=str, default='gemini',
                         choices=['openai', 'gemini'])
@@ -221,7 +225,7 @@ def main():
     # Load data
     print(f"\n[Loading dataset with {args.embedding_model} embeddings...]")
     data = load_clean_dataset(
-        n_per_author=args.n_per_author,
+        n_per_author=N_PER_AUTHOR,
         seed=args.seed,
         include_poems=True,
         embedding_model=args.embedding_model

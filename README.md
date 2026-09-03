@@ -286,9 +286,17 @@ accuracies, so the test is re-derived from them rather than recomputed.
 |---|---------|---------|
 | Null mean | 3.4% | 1.9% |
 | Null 95% CI | [3.0%, 3.9%] | [1.7%, 2.2%] |
-| Observed residual | 3.8% | 8.9% |
-| p-value | 0.08 | < 0.001 |
-| Conclusion | not above chance | above chance |
+| Observed residual | 3.9% | 8.9% |
+| p-value | ~0.06 | < 0.001 |
+| Within null 95% CI | yes | no |
+| Conclusion | **not** above chance | above chance |
+
+For Russian the null distribution is dense right around the residual, so the
+exact p-value is sensitive to the residual's second decimal — a residual of
+3.78%, 3.80% or 3.86% gives p = 0.089, 0.080 or 0.058 respectively. All are
+above 0.05 and inside the null 95% CI, so the conclusion is unaffected, but
+do not expect the p-value to reproduce to two decimals. Italian is
+unambiguous (8.9% sits far outside the null).
 
 Pre-computed results: `experiments/exp7_waterfall/results/permutation_test_*.json`
 

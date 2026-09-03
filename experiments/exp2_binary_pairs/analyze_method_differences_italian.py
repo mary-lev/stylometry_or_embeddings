@@ -24,6 +24,11 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 
 def load_italian_dataset(n_per_author=200, seed=42):
     """Load the published Italian dataset.
@@ -114,7 +119,6 @@ def get_stylometry_predictions_for_pair(texts, labels, cv_folds=5, seed=42):
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze Method Differences (Italian)")
-    parser.add_argument('--n-per-author', type=int, default=200)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--cv-folds', type=int, default=5)
     parser.add_argument('--top-n', type=int, default=30)
@@ -128,7 +132,7 @@ def main():
 
     # Load dataset
     print(f"\n[Loading Italian dataset...]")
-    data = load_italian_dataset(n_per_author=args.n_per_author, seed=args.seed)
+    data = load_italian_dataset(n_per_author=N_PER_AUTHOR, seed=args.seed)
 
     poems = data['poems']
     texts = data['texts']
@@ -146,7 +150,7 @@ def main():
     # Track per-poem statistics
     poem_stats = []
     for i, poem in enumerate(poems):
-        author_idx = i // args.n_per_author
+        author_idx = i // N_PER_AUTHOR
         poem_stats.append({
             'global_idx': i,
             'author': authors[author_idx],
@@ -177,14 +181,14 @@ def main():
         idx1 = author_to_idx[a1]
         idx2 = author_to_idx[a2]
 
-        start1 = idx1 * args.n_per_author
-        end1 = start1 + args.n_per_author
-        start2 = idx2 * args.n_per_author
-        end2 = start2 + args.n_per_author
+        start1 = idx1 * N_PER_AUTHOR
+        end1 = start1 + N_PER_AUTHOR
+        start2 = idx2 * N_PER_AUTHOR
+        end2 = start2 + N_PER_AUTHOR
 
         pair_indices = list(range(start1, end1)) + list(range(start2, end2))
         pair_embeddings = embeddings[pair_indices]
-        pair_labels = np.array([0] * args.n_per_author + [1] * args.n_per_author)
+        pair_labels = np.array([0] * N_PER_AUTHOR + [1] * N_PER_AUTHOR)
         pair_texts = [texts[i] for i in pair_indices]
 
         # Get predictions
@@ -377,7 +381,7 @@ def main():
         'timestamp': datetime.now().isoformat(),
         'language': 'italian',
         'settings': {
-            'n_per_author': args.n_per_author,
+            'n_per_author': N_PER_AUTHOR,
             'n_authors': n_authors,
             'n_pairs': n_pairs
         },

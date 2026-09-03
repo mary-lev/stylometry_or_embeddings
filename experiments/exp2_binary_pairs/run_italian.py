@@ -19,6 +19,11 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 
 def load_italian_dataset(n_per_author=200, seed=42):
     """Load the published Italian dataset with Gemini embeddings.
@@ -51,7 +56,6 @@ def classify_pair(embeddings, labels, cv_folds=5):
 
 def main():
     parser = argparse.ArgumentParser(description="EXP2 (Italian): Pairwise Classification with Embeddings")
-    parser.add_argument('--n-per-author', type=int, default=200)
     parser.add_argument('--cv-folds', type=int, default=5)
     parser.add_argument('--seed', type=int, default=42)
     args = parser.parse_args()
@@ -62,7 +66,7 @@ def main():
 
     # Load data
     print("\n[Loading Italian dataset with Gemini embeddings...]")
-    data = load_italian_dataset(n_per_author=args.n_per_author, seed=args.seed)
+    data = load_italian_dataset(n_per_author=N_PER_AUTHOR, seed=args.seed)
 
     authors = data['author_list']
     embeddings = data['embeddings']

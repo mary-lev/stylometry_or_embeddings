@@ -14,7 +14,16 @@ OUT = Path(__file__).parent.parent.parent / "figures"
 OUT.mkdir(parents=True, exist_ok=True)
 
 def load(f):
-    d = json.load(open(RES / f))
+    path = RES / f
+    if not path.exists():
+        script = ("analyze_method_differences_italian.py" if "italian" in f
+                  else "analyze_method_differences.py")
+        raise SystemExit(
+            f"Missing {path}.\n"
+            f"Generate it first:\n"
+            f"  python experiments/exp2_binary_pairs/{script}"
+        )
+    d = json.load(open(path))
     la = d["length_analysis"]
     labels = [b["label"] for b in la]
     emb = [b["emb_error"] * 100 for b in la]

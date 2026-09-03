@@ -63,9 +63,14 @@ def load_dataset(
     # Load embeddings
     emb_file = lang_dir / f"embeddings_{embedding_model}.npy"
     if not emb_file.exists():
+        available = sorted(p.stem.replace('embeddings_', '')
+                           for p in lang_dir.glob('embeddings_*.npy'))
         raise FileNotFoundError(
             f"Embeddings not found: {emb_file}\n"
-            f"Available models: gemini, openai, voyage, qwen8b, e5-large, bge-m3"
+            f"Downloaded for {language}: {', '.join(available) if available else 'none'}\n"
+            f"Only Gemini is fetched by 'download_data.py --minimal'. "
+            f"To get the other models:\n"
+            f"    python download_data.py --all"
         )
 
     embeddings = np.load(emb_file)

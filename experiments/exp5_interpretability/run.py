@@ -35,6 +35,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 
 def load_data(n_per_author=200, seed=42, embedding_model='gemini'):
     """Load clean dataset with specified embeddings."""
@@ -522,8 +527,6 @@ def probe_topic(poems, embeddings, seed=42, n_topics=20, linguistic_features=Non
 
 def main():
     parser = argparse.ArgumentParser(description="EXP5: Probing Tasks")
-    parser.add_argument('--n-per-author', type=int, default=200,
-                        help='Poems per author (default: 200)')
     parser.add_argument('--seed', type=int, default=42,
                         help='Random seed (default: 42)')
     parser.add_argument('--embedding-model', type=str, default='gemini',
@@ -538,7 +541,7 @@ def main():
     print("=" * 60)
 
     # Load data
-    data = load_data(n_per_author=args.n_per_author, seed=args.seed,
+    data = load_data(n_per_author=N_PER_AUTHOR, seed=args.seed,
                      embedding_model=args.embedding_model)
     poems = data['poems']
     embeddings = data['embeddings']
@@ -548,7 +551,7 @@ def main():
         'timestamp': datetime.now().isoformat(),
         'settings': {
             'n_authors': len(data['author_list']),
-            'n_per_author': args.n_per_author,
+            'n_per_author': N_PER_AUTHOR,
             'total_samples': len(poems),
             'embedding_model': args.embedding_model,
             'embedding_dim': embeddings.shape[1],

@@ -44,10 +44,29 @@ PANELS = {
 def load_panel(fname, block, interp_key):
     path = RESULTS / fname
     if not path.exists():
-        # earlier runs wrote the Italian Qwen results with a hyphenated name
-        alt = RESULTS / fname.replace("qwen8b", "qwen-8b")
-        if alt.exists():
-            path = alt
+        # Earlier runs used slightly different result filenames: the Italian
+        # Qwen file was hyphenated, and the Italian Gemini file had no model
+        # suffix at all. Accept those so a fresh clone can draw the figures
+        # from the shipped results.
+        for alt_name in (fname.replace("qwen8b", "qwen-8b"),
+                         fname.replace("_gemini", "")):
+            alt = RESULTS / alt_name
+            if alt.exists():
+                path = alt
+                break
+
+    if not path.exists():
+        lang = "italian" if "italian" in fname else "russian"
+        model = "qwen8b" if "qwen" in fname else "gemini"
+        script = ("run_italian_extended.py" if lang == "italian"
+                  else "run_extended.py")
+        raise SystemExit(
+            f"Missing {RESULTS / fname}.\n"
+            f"Generate it first:\n"
+            f"  python experiments/exp7_waterfall/{script} "
+            f"--embedding-model {model}"
+        )
+
     d = json.load(open(path, encoding="utf-8"))
     exp = d["experiments"][block]
     st = exp["stages"]

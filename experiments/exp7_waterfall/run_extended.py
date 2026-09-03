@@ -58,6 +58,11 @@ warnings.filterwarnings('ignore')
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+# The published dataset is fixed at 200 poems per author (see data/README.md);
+# every result in the paper is computed at this size.
+N_PER_AUTHOR = 200
+
+
 
 class CharNgramExtractor:
     """
@@ -331,8 +336,6 @@ def run_waterfall_cv(poems, embeddings, y, tier_order, n_authors, n_folds=5, see
 
 def main():
     parser = argparse.ArgumentParser(description="EXP7 EXTENDED: Waterfall with Stylometry Tiers")
-    parser.add_argument('--n-per-author', type=int, default=200,
-                        help='Poems per author (default: 200)')
     parser.add_argument('--n-folds', type=int, default=5,
                         help='Number of CV folds (default: 5)')
     parser.add_argument('--seed', type=int, default=42,
@@ -357,7 +360,7 @@ def main():
     # Load clean dataset
     print(f"\n[Loading clean dataset with {args.embedding_model} embeddings...]")
     data = load_clean_dataset(
-        n_per_author=args.n_per_author,
+        n_per_author=N_PER_AUTHOR,
         seed=args.seed,
         include_poems=True,
         embedding_model=args.embedding_model
@@ -373,7 +376,7 @@ def main():
 
     print(f"\n[Settings]")
     print(f"  Authors: {n_authors}")
-    print(f"  Poems per author: {args.n_per_author}")
+    print(f"  Poems per author: {N_PER_AUTHOR}")
     print(f"  Total samples: {n_samples}")
     print(f"  CV folds: {args.n_folds}")
     print(f"  Embedding model: {args.embedding_model}")
@@ -388,7 +391,7 @@ def main():
         'language': 'russian',
         'settings': {
             'n_authors': n_authors,
-            'n_per_author': args.n_per_author,
+            'n_per_author': N_PER_AUTHOR,
             'total_samples': n_samples,
             'n_folds': args.n_folds,
             'seed': args.seed,
