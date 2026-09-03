@@ -51,101 +51,7 @@ below runs the actual experiments, shortest first.
 
 ---
 
-## Reproduction Sequence
-
-Commands are grouped by cost so you can stop at any stage. Stages 1–3 run on
-the default download from Quick Start; only stage 4 needs more data.
-
-**Nearly every command runs as written, with no arguments.** Defaults are the
-published settings: Russian, Gemini embeddings, 200 poems per author, seed 42,
-5-fold CV. Stages 2 and 3 are argument-free entirely; stage 1 has one argument
-and stage 4 has three, each selecting something genuinely different —
-`--language italian` for the Italian permutation test, `--all` for the extra
-embeddings, and `--embedding-model qwen8b` for the two Qwen3-8B columns.
-
-The comment after each command is the headline number it should print, so you
-can check as you go. Full expected output for each is in *Reproducing Results*
-below. Timings are from one 20-core machine and are indicative.
-
-### Stage 1 — verify (about 3 seconds in total)
-
-These re-derive published numbers from the results files already in the
-repository. Nothing is recomputed, so this is the fastest way to confirm the
-installation is sound. (The data itself was already checksummed by
-`download_data.py` in Quick Start.)
-
-```bash
-python experiments/exp7_waterfall/run_permutation_test.py     # RU: not above chance
-python experiments/exp7_waterfall/run_permutation_test.py --language italian
-                                                              # IT: above chance, p<0.001
-python experiments/exp10_embedding_structure/run_ablation.py  # mask 0.134 / shuffle 0.027
-python experiments/exp7_waterfall/make_waterfall_figures.py   # writes 2 PNGs
-```
-
-### Stage 2 — fast experiments (a few minutes each)
-
-```bash
-python experiments/exp5_interpretability/run.py               # topic probe 81.3%
-python experiments/exp5_interpretability/run_cross_topic.py   # cross-topic 35.7%
-python experiments/exp8_combined_features/run.py              # 61.3 / 59.2 / 70.5
-python experiments/exp8_combined_features/analyze_residualization.py
-                                                              # residual embeddings ~12.5%
-python experiments/exp4_multiclass/run.py                     # multiclass 61.3%
-python experiments/exp2_binary_pairs/run_italian.py           # Italian pairwise
-```
-
-### Stage 3 — main results (10–40 minutes each)
-
-```bash
-# Table 3, the main result. Italian is the slowest here, about 40 minutes.
-python experiments/exp7_waterfall/run_extended.py             # 61.3 -> 3.8% (1.1x chance)
-python experiments/exp7_waterfall/run_italian_extended.py     # 67.0 -> 8.9% (4.6x chance)
-
-# Tables 2 (Italian), 4 and 6, and the frequency bands
-python experiments/exp8_combined_features/run_italian.py      # 67.1 / 79.7 / 81.8
-python experiments/exp4_multiclass/run_length_sensitivity.py  # 61.3/57.8 -> 99.7/100.0
-python experiments/exp7_waterfall/probe_discriminative_features.py
-                                                              # vocabulary diversity R2 0.77
-python experiments/exp7_waterfall/analyze_frequency_bands.py  # 500-2000 band highest, 77.6%
-
-# Pairwise attribution and error analysis
-python experiments/exp2_binary_pairs/run.py                   # mean over 406 pairs 89.6%
-python experiments/exp2_binary_pairs/analyze_method_differences.py
-                                                              # per-poem 93.8% / 94.5%
-python experiments/exp4_multiclass/analyze_errors_comparison.py
-                                                              # error overlap 39%, TTR -0.16
-python experiments/exp7_waterfall/test_nonlinear_tiers.py     # kernel 47.8% vs linear 4.3%
-```
-
-### Stage 4 — needs the full download or hours of compute
-
-```bash
-python download_data.py --all        # all embedding models, ~896 MB
-
-# Figure 1 compares seven models
-python experiments/exp8a_multi_model_comparison/run.py           # Gemini highest, 61.3%
-python experiments/exp8a_multi_model_comparison/run_italian.py   # Gemini highest, 67.1%
-
-# The Qwen3-8B columns of Table 3 -- the only place a model must be named
-python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
-                                                                 # 50.7 -> 3.8%
-python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
-                                                                 # 57.6 -> 9.4%
-
-# Italian pairwise: 1,326 author pairs, allow 2-3 hours
-python experiments/exp2_binary_pairs/analyze_method_differences_italian.py
-                                                                 # per-poem 96.1% / 98.5%
-python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
-```
-
-Two further options exist but are **not needed** to reproduce anything: 
-`run_permutation_test.py --recompute` (~3.5 h Russian, ~7 h Italian) and
-`run_ablation.py --regenerate` (calls a paid API). Stage 1 reproduces both
-results from the published artifacts.
-
----
-
-## Data
+## Getting the Data
 
 **Note:** Large files (embeddings, poems) are hosted on Zenodo due to GitHub size limitations.
 
@@ -192,117 +98,152 @@ See `requirements.txt` for full dependencies.
 ---
 
 
-## Reproducing Results
+## Reproducing the Paper
 
-### Figure 1: Embedding Model Comparison
+Every table and figure in the paper is produced by a script in this repository,
+from the data downloaded above. This section follows the paper's own order.
+
+**The flow is the same each time:** run the command, compare the numbers it
+prints against the *Expected* block underneath. Commands take no arguments
+unless shown. Runtimes are from one 20-core machine.
+
+Results are written to `experiments/<exp>/results/` and figures to `figures/`.
+Both are committed, so you can compare against the published values before
+running anything.
+
+### Coverage at a glance
+
+| Paper element | Command | Time |
+|---|---|---|
+| Table 1 — corpus statistics | *(dataset description, no computation)* | — |
+| Figure 1 — model comparison | `exp8a_multi_model_comparison/run.py` + `visualize_model_comparison.py` | 5 min · needs `--all` |
+| Table 2 — stylometry methods | `exp0_stylometry_baseline/run.py` | 15 min |
+| Table 3 — embeddings vs stylometry | `exp8_combined_features/run.py`, `run_italian.py` | 20 min |
+| Figures 2–3 — combined comparison | `exp8a_multi_model_comparison/visualize.py`, `visualize_italian.py` | 5 s · needs `--all` |
+| §Binary Attribution | `exp2_binary_pairs/run.py`, `analyze_method_differences.py` | 30 min |
+| Table 4 — text length | `exp4_multiclass/run_length_sensitivity.py` | 10 min |
+| Figure 4 — error by length | `exp2_binary_pairs/plot_binary_error_by_length.py` | 5 s |
+| Table 5 — residualization waterfall | `exp7_waterfall/run_extended.py`, `run_italian_extended.py` | 50 min |
+| Figures 5–6 — waterfall | `exp7_waterfall/make_waterfall_figures.py` | 2 s |
+| §Permutation test | `exp7_waterfall/run_permutation_test.py` | 2 s |
+| Table 6 — continuous probes | `exp7_waterfall/probe_discriminative_features.py` | 10 min |
+| Table 7 — classification probes | `exp5_interpretability/run.py` | 3 min |
+| Table 8 — frequency bands | `exp7_waterfall/analyze_frequency_bands.py` | 10 min |
+| Table 9 — cross-topic | `exp5_interpretability/run_cross_topic.py` | 5 min |
+| §Perturbation analysis | `exp10_embedding_structure/run_ablation.py` | 2 s |
+| Table 10 — bidirectional residuals | `exp8_combined_features/analyze_residualization.py` | 5 min |
+| §Error overlap | `exp4_multiclass/analyze_errors_comparison.py` | 20 min |
+| Table 11 — error by length | `exp2_binary_pairs/analyze_method_differences.py` | 15 min |
+| §Linear vs kernel | `exp7_waterfall/test_nonlinear_tiers.py` | 20 min |
+
+Only Figure 1 and the two figures below it need `python download_data.py --all`.
+Everything else runs on the default download.
+
+---
+
+### Paper §Data
+
+#### Figure 1 — Embedding Model Comparison
 
 ```bash
-python download_data.py --all      # this comparison needs every model
+python download_data.py --all       # this comparison needs every model
 python experiments/exp8a_multi_model_comparison/run.py
 python experiments/exp8a_multi_model_comparison/run_italian.py
+python experiments/exp8a_multi_model_comparison/visualize_model_comparison.py
 ```
 
-**Note**: this is the one experiment that needs more than the default
-download. With
-only the Gemini embeddings downloaded it still runs, but compares a single
-model and says so loudly; the figure then shows one bar instead of the table
-below.
+**Expected** — `figures/embedding_model_comparison.png`
 
-Pre-computed results: `experiments/exp8a_multi_model_comparison/results/`
-
-**Expected output:**
-
-![Model Comparison](figures/embedding_model_comparison.png)
-
-| Model | Russian Accuracy | Italian Accuracy |
-|-------|-----------------|------------------|
+| Model | Russian | Italian |
+|-------|---------|---------|
 | Gemini text-embedding-001 | **61.3%** | **67.1%** |
 | OpenAI text-embedding-3-large | 56.1% | 65.4% |
 | Voyage-3-large | 51.6% | 59.4% |
 | Qwen3-Embedding-8B | 50.8% | 57.6% |
 | E5-large | 47.2% | 61.3% |
-| BGE-M3 | 41.9% | — (Russian only) |
+| BGE-M3 | 41.9% | — |
+| Qwen3-Embedding-0.6B | 35.8% | — |
 
-Chance is 3.4% (Russian) and 1.9% (Italian). Gemini ranks highest and Qwen3-8B is
-the strongest open-source model in both corpora, which is why those two are carried
-through the main analysis.
-
----
-
-### Table 3: Waterfall Residualization (Main Result)
-
-```bash
-# Russian corpus, Gemini embeddings (the default)
-python experiments/exp7_waterfall/run_extended.py
-
-# Italian corpus, Gemini embeddings (the default)
-python experiments/exp7_waterfall/run_italian_extended.py
-
-# The same two with Qwen3-8B instead (needs `download_data.py --all`)
-python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
-python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
-```
-
-The Qwen3-8B pair is optional: the Gemini columns reproduce the main result on
-their own, and they run on the default download.
-
-Pre-computed results: `experiments/exp7_waterfall/results/`
-
-**Expected output:**
-
-![Waterfall Residualization](figures/waterfall_figure.png)
-
-| Stage | RU Gemini | RU Qwen3-8B | IT Gemini | IT Qwen3-8B |
-|-------|-----------|-------------|-----------|-------------|
-| **Baseline embeddings** | 61.3% | 50.7% | 67.0% | 57.6% |
-| After interpretable (T1-T4) | 40.0% | 32.2% | 46.0% | 41.1% |
-| After char n-grams (T5) | 10.2% | 8.3% | 16.1% | 16.8% |
-| After word bigrams (T6) | 3.8% | 4.0% | 8.7% | 9.5% |
-| **Final residual (kernel control)** | **3.8%** | **3.8%** | **8.9%** | **9.4%** |
-| | | | | |
-| **Final lift vs. chance** | **1.1×** | **1.1×** | **4.6×** | **4.9×** |
-| Chance level | 3.4% | 3.4% | 1.9% | 1.9% |
-
-**Key insight**: For Russian, the residual drops to chance after removing character-level features.
+Chance is 3.4% (Russian) and 1.9% (Italian). Qwen3-Embedding-0.6B is **not**
+in the Zenodo release, so that bar cannot be recomputed; the script skips it
+and reports which models were missing.
 
 ---
 
-### Table 2: Stylometry Baseline & Combined Results
+### Paper §Results
+
+#### Table 2 — Stylometric methods
 
 ```bash
 python experiments/exp0_stylometry_baseline/run.py
-python experiments/exp8_combined_features/run.py
-python experiments/exp8_combined_features/run_italian.py
 ```
 
-Pre-computed results: `experiments/exp8_combined_features/results/`
+**Expected** (Russian; the script prints Italian too)
 
-**Expected output:**
+| Method | Accuracy |
+|--------|----------|
+| Full combined | 61.7% |
+| Char 3-grams + function words | 59.2% |
+| Char n-grams (2–4) | 58.3% |
+| Char 3-grams | 57.8% |
+| Word n-grams (1–2) | 33.8% |
+| MFW + Logistic Regression | 19.2% |
+| Cosine Delta | 19.0% |
+| Function words | 16.2% |
+| Burrows' Delta (100 MFW) | 13.0% |
+| Burrows' Delta (500 MFW) | 7.0% |
+| *Chance* | *3.4%* |
 
-![Russian Comparison](figures/combined_comparison.png)
+#### Table 3 — Embeddings, stylometry, and their combination
 
-![Italian Comparison](figures/combined_comparison_italian.png)
+```bash
+python experiments/exp8_combined_features/run.py           # Russian
+python experiments/exp8_combined_features/run_italian.py   # Italian
+```
 
-| Method | Russian (29 authors) | Italian (52 authors) |
-|--------|---------------------|----------------------|
+**Expected**
+
+| Method | Russian | Italian |
+|--------|---------|---------|
 | Embeddings (Gemini) | 61.3% ± 1.3% | 67.1% ± 0.5% |
-| Stylometry | 59.2% ± 1.1% | 79.7% ± 1.3% |
+| Stylometry (char 3-grams + function words) | 59.2% ± 1.1% | 79.7% ± 1.3% |
 | **Combined** | **70.5% ± 0.9%** | **81.8% ± 1.1%** |
-| Chance | 3.4% | 1.9% |
+| *Chance* | *3.4%* | *1.9%* |
 
----
+#### Figures 2–3 — Combined comparison across models
 
-### Table 4: Effect of Text Length
+```bash
+python experiments/exp8a_multi_model_comparison/visualize.py          # Russian
+python experiments/exp8a_multi_model_comparison/visualize_italian.py  # Italian
+```
+
+Needs `exp8a/run.py` and `run_italian.py` from Figure 1 above.
+
+**Expected** — `figures/combined_comparison.png`, `combined_comparison_italian.png`.
+Stylometry baseline 59.4% (Russian) and 80.4% (Italian); Gemini combined 71.2%
+and 82.2%.
+
+#### §Binary Attribution
+
+```bash
+python experiments/exp4_multiclass/run.py                   # multiclass + confusion matrix
+python experiments/exp2_binary_pairs/run.py                 # 406 Russian pairs
+python experiments/exp2_binary_pairs/run_italian.py         # 1,326 Italian pairs
+python experiments/exp2_binary_pairs/analyze_method_differences.py
+```
+
+**Expected** — mean pairwise accuracy over all pairs is 89.6% (Russian). The
+paper reports the *per-poem* average instead, which
+`analyze_method_differences.py` prints: **93.8%** embeddings and **94.5%**
+stylometry for Russian (96.1% / 98.5% for Italian, see Table 11).
+
+#### Table 4 — Effect of text length
 
 ```bash
 python experiments/exp4_multiclass/run_length_sensitivity.py
 ```
 
-Pre-computed results: `experiments/exp4_multiclass/results/`
-
-**Expected output:**
-
-![Error by Length](figures/binary_fig2_error_by_length.png)
+**Expected**
 
 | Concatenation | Words | Gemini Embeddings | Stylometry |
 |---------------|-------|-------------------|------------|
@@ -311,87 +252,67 @@ Pre-computed results: `experiments/exp4_multiclass/results/`
 | 10 poems | 1,004 | 99.1% | 99.5% |
 | 20 poems | 2,008 | 99.7% | 100.0% |
 
-**Finding**: Text length is the primary limiting factor for single-poem attribution.
+The stylometry column here is char 3-grams alone, which is why 1 poem reads
+57.8% rather than the 59.2% of Table 2's char3+function-words row.
 
----
-
-### Tables 6-7: Probing Analysis
-
-```bash
-# Classification probes (semantic and prosodic properties)
-python experiments/exp5_interpretability/run.py
-
-# Continuous probes (lexical and punctuation properties, Ridge regression)
-python experiments/exp7_waterfall/probe_discriminative_features.py
-```
-
-Pre-computed results: `experiments/exp5_interpretability/results/probing_results.json`
-and `experiments/exp7_waterfall/results/probe_discriminative_gemini.json`
-
-**Expected output:**
-
-#### Continuous Properties (Ridge Regression)
-
-| Property | R² | Encoding |
-|----------|-----|----------|
-| Vocabulary diversity (1-100 MFW) | 0.77 | Strong |
-| Vocabulary diversity (100-500 MFW) | 0.68 | Strong |
-| Vocabulary diversity (500-2000 MFW) | 0.63 | Strong |
-| Exclamation rate | 0.53 | Moderate |
-| Ellipsis rate | 0.44 | Moderate |
-| Em-dash rate | 0.30 | Moderate |
-| Hyphen rate | -0.37 | Not encoded |
-| Colon rate | < 0 | Not encoded |
-
-#### Classification Properties (Logistic Regression)
-
-| Property | Type | Accuracy | Chance | Lift |
-|----------|------|----------|--------|------|
-| Topic (Inner vs. Nature) | Semantic | 81.3% | 50% | 1.6× |
-| Meter (Iamb vs. Trochee) | Prosodic | 65.1% | 50% | 1.3× |
-| Feet (4 vs. 5) | Prosodic | 63.3% | 50% | 1.3× |
-| Rhyme (ABAB vs. AABB) | Prosodic | 61.0% | 50% | 1.2× |
-| Clausula (regular vs. free) | Prosodic | 56.2% | 50% | 1.1× |
-| Meter (5-class) | Prosodic | 32.8% | 20% | 1.6× |
-
-**Finding**: Embeddings encode semantic content (topic: 81%) more strongly than prosodic structure (56-65%).
-
----
-
-### Table 8: Cross-Topic Validation
+#### Figure 4 — Binary error by text length
 
 ```bash
-python experiments/exp5_interpretability/run_cross_topic.py
+python experiments/exp2_binary_pairs/analyze_method_differences.py
+python experiments/exp2_binary_pairs/analyze_method_differences_italian.py   # 2-3 h
+python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
 ```
 
-Pre-computed results: `experiments/exp5_interpretability/results/cross_topic_validation_gemini.json`
-
-**Expected output:**
-
-| Condition | Accuracy | Δ from baseline |
-|-----------|----------|-----------------|
-| Baseline (random CV) | 61.3% | — |
-| Leave-one-topic-out | 55.8% | -5.5 pp |
-| Within-topic | 55.5% | -5.8 pp |
-| **Cross-topic** | **35.7%** | **-25.6 pp** |
-
-**Finding**: ~40% of signal is topic-dependent, ~60% reflects genuine stylistic patterns.
+**Expected** — `figures/binary_fig2_error_by_length.png`, both panels; overall
+93.8% / 94.5% (Russian) and 96.1% / 98.5% (Italian).
 
 ---
 
-### Permutation Test (Residual Significance)
+### Paper §Embeddings Deconstruction: Residualization Waterfall
 
-Tests whether the final residual accuracy is significantly above chance.
+#### Table 5 — Residualization waterfall (main result)
+
+```bash
+python experiments/exp7_waterfall/run_extended.py             # Russian, ~10 min
+python experiments/exp7_waterfall/run_italian_extended.py     # Italian, ~40 min
+
+# The Qwen3-8B columns (optional; needs `download_data.py --all`)
+python experiments/exp7_waterfall/run_extended.py --embedding-model qwen8b
+python experiments/exp7_waterfall/run_italian_extended.py --embedding-model qwen8b
+```
+
+**Expected**
+
+| Stage | RU Gemini | RU Qwen3-8B | IT Gemini | IT Qwen3-8B |
+|-------|-----------|-------------|-----------|-------------|
+| Baseline embeddings | 61.3% | 50.7% | 67.0% | 57.6% |
+| After interpretable (T1–T4) | 40.0% | 32.2% | 46.0% | 41.1% |
+| After char n-grams (T5) | 10.2% | 8.3% | 16.1% | 16.8% |
+| After word bigrams (T6) | 3.8% | 4.0% | 8.7% | 9.5% |
+| **Final residual** | **3.8%** | **3.8%** | **8.9%** | **9.4%** |
+| **Lift vs. chance** | **1.1×** | **1.1×** | **4.6×** | **4.9×** |
+| *Chance* | *3.4%* | *3.4%* | *1.9%* | *1.9%* |
+
+#### Figures 5–6 — Waterfall
+
+```bash
+python experiments/exp7_waterfall/make_waterfall_figures.py
+```
+
+Runs immediately from the committed results; re-run the waterfalls above first
+if you want figures from your own run.
+
+**Expected** — `figures/waterfall_figure.png` (Gemini) and
+`waterfall_figure_qwen.png` (Qwen3-8B), each with a Russian and an Italian panel.
+
+#### §Permutation test — is the residual above chance?
 
 ```bash
 python experiments/exp7_waterfall/run_permutation_test.py
 python experiments/exp7_waterfall/run_permutation_test.py --language italian
 ```
 
-Runs in seconds by default — the published results files store all 1,000 null
-accuracies, so the test is re-derived from them rather than recomputed.
-
-**Expected output:**
+**Expected**
 
 | | Russian | Italian |
 |---|---------|---------|
@@ -402,86 +323,96 @@ accuracies, so the test is re-derived from them rather than recomputed.
 | Within null 95% CI | yes | no |
 | Conclusion | **not** above chance | above chance |
 
-For Russian the null distribution is dense right around the residual, so the
-exact p-value is sensitive to the residual's second decimal — a residual of
-3.78%, 3.80% or 3.86% gives p = 0.089, 0.080 or 0.058 respectively. All are
-above 0.05 and inside the null 95% CI, so the conclusion is unaffected, but
-do not expect the p-value to reproduce to two decimals. Italian is
-unambiguous (8.9% sits far outside the null).
-
-Pre-computed results: `experiments/exp7_waterfall/results/permutation_test_*.json`
-
-<details>
-<summary>Regenerating the null distribution (optional, hours)</summary>
-
-`--recompute` reshuffles labels 1,000 times and re-classifies each time:
-roughly **3.5 h for Russian and 7 h for Italian** (53 s setup + ~13 s per
-permutation). This is not needed to verify the published result.
-
-```bash
-python experiments/exp7_waterfall/run_permutation_test.py --recompute
-```
-
-Note that this script and `run_extended.py` residualize differently: the
-waterfall fits per fold on training data only (residual 3.8% / 8.9%, the value
-the paper reports), while the permutation test residualizes once over all data
-to hold the residuals fixed while labels are shuffled (giving a lower
-`observed_accuracy` of 1.2% / 2.5% in the results file). The null distribution
-is label-independent and applies to either; the verification above compares it
-against the waterfall residual.
-</details>
+The 1,000 null accuracies are stored in the results files, so this re-derives
+the test in seconds. For Russian the null is dense right at the residual, so
+the exact p moves with the residual's second decimal (3.78 / 3.80 / 3.86%
+give p = 0.089 / 0.080 / 0.058); all are above 0.05 and inside the CI, so the
+conclusion is unaffected. `--recompute` redoes the permutations from scratch
+(~3.5 h Russian, ~7 h Italian) and is not needed.
 
 ---
 
-### Vocabulary Frequency Bands
+### Paper §What Do Embeddings Encode? (Probing Analysis)
+
+#### Table 6 — Continuous property probes (Ridge regression)
+
+```bash
+python experiments/exp7_waterfall/probe_discriminative_features.py
+```
+
+**Expected**
+
+| Property | R² | Encoding |
+|----------|-----|----------|
+| Vocabulary diversity (1–100 MFW) | 0.77 | Strong |
+| Vocabulary diversity (100–500 MFW) | 0.68 | Strong |
+| Vocabulary diversity (500–2000 MFW) | 0.63 | Strong |
+| Exclamation rate | 0.53 | Moderate |
+| Ellipsis rate | 0.44 | Moderate |
+| Em-dash rate | 0.30 | Moderate |
+| Hyphen rate | −0.37 | Not encoded |
+| Colon rate | < 0 | Not encoded |
+
+#### Table 7 — Classification probes (logistic regression)
+
+```bash
+python experiments/exp5_interpretability/run.py
+```
+
+**Expected**
+
+| Property | Type | Accuracy | Chance | Lift |
+|----------|------|----------|--------|------|
+| Topic (Inner vs. Nature) | Semantic | 81.3% | 50% | 1.6× |
+| Meter (Iamb vs. Trochee) | Prosodic | 65.1% | 50% | 1.3× |
+| Feet (4 vs. 5) | Prosodic | 63.3% | 50% | 1.3× |
+| Rhyme (ABAB vs. AABB) | Prosodic | 61.0% | 50% | 1.2× |
+| Clausula (regular vs. free) | Prosodic | 56.2% | 50% | 1.1× |
+| Meter (5-class) | Prosodic | 32.8% | 20% | 1.6× |
+
+Embeddings encode semantic content (topic 81%) more strongly than prosodic
+structure (56–65%).
+
+#### Table 8 — Vocabulary frequency bands
 
 ```bash
 python experiments/exp7_waterfall/analyze_frequency_bands.py
 ```
 
-Pre-computed results: `experiments/exp7_waterfall/results/frequency_band_analysis.json`
-
-**Expected output:**
+**Expected**
 
 | Frequency band | Word type | Accuracy |
 |----------------|-----------|----------|
-| 1-100 | Function words | 76.4% |
-| 100-500 | Style markers | 76.6% |
-| 500-2000 | Topic vocabulary | **77.6%** |
-| 2000-5000 | Rare vocabulary | 74.0% |
+| 1–100 | Function words | 76.4% |
+| 100–500 | Style markers | 76.6% |
+| 500–2000 | Topic vocabulary | **77.6%** |
+| 2000–5000 | Rare vocabulary | 74.0% |
 
-**Finding**: The prose pattern inverts — topic vocabulary is the most
-author-discriminative band for poetry, not function words.
+The prose pattern inverts: topic vocabulary is the most author-discriminative
+band for poetry, not function words.
 
----
-
-### Binary Attribution Error by Text Length
+#### Table 9 — Cross-topic validation
 
 ```bash
-# Per-poem method comparison (produces method_differences_*.json)
-python experiments/exp2_binary_pairs/analyze_method_differences.py
-
-# Figure, plotted from the analysis above
-python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
+python experiments/exp5_interpretability/run_cross_topic.py
 ```
 
-Pre-computed results: `experiments/exp2_binary_pairs/results/`
+**Expected**
 
----
+| Condition | Accuracy | Δ from baseline |
+|-----------|----------|-----------------|
+| Baseline (random CV) | 61.3% | — |
+| Leave-one-topic-out | 55.8% | −5.5 pp |
+| Within-topic | 55.5% | −5.8 pp |
+| **Cross-topic** | **35.7%** | **−25.6 pp** |
 
-### Embedding Ablation (Perturbation Analysis)
-
-Measures how far embeddings move when content words are masked versus when word
-order is shuffled — the basis for the claim that semantic content dominates
-embedding geometry (cosine distance 0.134 vs. 0.027).
+#### §Perturbation analysis — what moves an embedding?
 
 ```bash
 python experiments/exp10_embedding_structure/run_ablation.py
 ```
 
-Runs offline by default — no API key, no cost.
-
-**Expected output:**
+**Expected**
 
 | Modification | Cosine distance from original |
 |--------------|-------------------------------|
@@ -491,51 +422,56 @@ Runs offline by default — no API key, no cost.
 | Remove punctuation | 0.0191 ± 0.0055 |
 | Lowercase | 0.0042 ± 0.0030 |
 
-**Finding**: Masking content words moves embeddings ~5× further than shuffling
-word order — semantic content dominates embedding geometry.
+Masking content words moves embeddings ~5× further than shuffling word order.
 
-Pre-computed results: `experiments/exp10_embedding_structure/results/ablation_results.json`,
-which stores the per-poem cosine distance for all 290 sampled poems across all five
-ablations. Every number above is recomputed from that file.
-
-<details>
-<summary>Regenerating the distances from scratch (optional, requires an API key)</summary>
-
-Unlike every other experiment, this one perturbs the poem text and must re-embed
-the *modified* text, so the Zenodo embeddings — which cover the original poems
-only — cannot supply it. Regenerating therefore calls the Gemini API once per
-poem per ablation (290 × 5 = 1,450 calls) and costs money. This is **not**
-required to reproduce the published result — the default command above already
-does that.
-
-```bash
-export GEMINI_API_KEY=YOUR_API_KEY_HERE
-python experiments/exp10_embedding_structure/run_ablation.py --regenerate
-
-# Preview the perturbations and call count without calling the API
-python experiments/exp10_embedding_structure/run_ablation.py --dry-run
-```
-</details>
+The perturbed texts are generated by the script and so cannot be shipped
+pre-embedded; the per-poem cosine distances are shipped instead, and the table
+above is recomputed from them. `--regenerate` re-embeds through the Gemini API
+(1,450 calls, costs money) and is not needed.
 
 ---
 
-### Regenerating the Figures
+### Paper §How Do Methods Differ? (Complementarity Analysis)
 
-Every figure in `figures/` is generated from a results file, not hand-edited.
-Each plotting script reads the results of the experiment above it in the
-Reproduction Sequence, and names the missing command if you run it too early.
+#### Table 10 — Bidirectional residualization
 
-| Figure | Plotting script | Needs |
-|--------|-----------------|-------|
-| `waterfall_figure.png`, `waterfall_figure_qwen.png` | `exp7_waterfall/make_waterfall_figures.py` | ships with results — runs immediately |
-| `embedding_model_comparison.png` | `exp8a_multi_model_comparison/visualize_model_comparison.py` | stage 4 `exp8a/run.py` |
-| `combined_comparison.png`, `combined_comparison_italian.png` | `exp8a_multi_model_comparison/visualize{,_italian}.py` | stage 4 `exp8a/run{,_italian}.py` |
-| `binary_fig2_error_by_length.png` | `exp2_binary_pairs/plot_binary_error_by_length.py` | stage 3 + 4 `analyze_method_differences{,_italian}.py` |
+```bash
+python experiments/exp8_combined_features/analyze_residualization.py
+python experiments/exp8_combined_features/analyze_residualization.py --language italian
+```
 
-**Note on Qwen-0.6B**: Figure 1 includes a seventh model, Qwen3-Embedding-0.6B,
-whose embeddings are **not** part of the Zenodo release. `exp8a/run.py` skips it
-automatically when the file is absent and reports which models were skipped,
-producing the six-model figure instead.
+**Expected** — Russian: embeddings retain 12.5% accuracy (3.6× chance) after
+removing stylometry, while stylometry retains 7.6% (2.2×) after removing
+embeddings. Italian is balanced at 19.1% / 19.2%.
+
+#### §Error overlap and linearity
+
+```bash
+python experiments/exp4_multiclass/analyze_errors_comparison.py
+python experiments/exp7_waterfall/test_nonlinear_tiers.py
+```
+
+**Expected** — error overlap (Jaccard) **39%**, stylometry/TTR correlation
+**−0.16**; and linear Ridge residualization reduces attribution to **4.34%**
+where an RBF kernel leaves **47.76%**, confirming the stylistic signal is
+linearly accessible.
+
+#### Table 11 — Binary error rates by text length
+
+```bash
+python experiments/exp2_binary_pairs/analyze_method_differences.py
+```
+
+**Expected** (Russian, Gemini)
+
+| Length bin | N poems | Embedding error | Stylometry error |
+|------------|---------|-----------------|------------------|
+| Very short (≤30 words) | 252 | 10.2% | 13.3% |
+| Short (31–50) | 822 | 8.6% | 8.9% |
+| Medium (51–80) | 1,804 | 7.3% | 6.2% |
+| Medium–long (81–120) | 1,590 | 5.1% | 4.2% |
+| Long (121–200) | 922 | 4.4% | 2.9% |
+| Very long (>200) | 410 | 2.9% | 2.3% |
 
 ---
 
