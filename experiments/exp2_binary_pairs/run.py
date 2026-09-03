@@ -134,9 +134,7 @@ def main():
         )
         # Include embedding model in suffix if not openai
         model_suffix = f"_{args.embedding_model}" if args.embedding_model != 'openai' else ""
-        # Name the output after the poems-per-author actually loaded, not the
-        # requested value: the published dataset is fixed at 200 per author, so
-        # --n-per-author cannot change it and must not mislabel the results.
+        # Name the output after the poems-per-author actually loaded.
         suffix = f"_clean_n{n_per_author}{model_suffix}"
     else:
         results, authors, n_per_author, seed = run_with_corpus(
