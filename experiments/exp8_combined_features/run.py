@@ -144,7 +144,7 @@ def main():
                         help='Random seed')
     parser.add_argument('--embedding-model', type=str, default='gemini',
                         choices=['openai', 'gemini'],
-                        help='Embedding model to use (default: openai)')
+                        help='Embedding model to use')
     parser.add_argument('--pairwise', action='store_true',
                         help='Also run pairwise classification (slow)')
     args = parser.parse_args()
