@@ -47,7 +47,7 @@ file, so it is also the way to confirm an existing download. It is safe to
 re-run: files already on disk are checked, not fetched again.
 
 If those three commands succeed, the installation is correct. The section
-below runs the actual experiments, shortest first.
+below reproduces the paper, table by table.
 
 ---
 
@@ -74,13 +74,16 @@ See `data/README.md` for detailed documentation.
 - **Russian**: 29 poets, 200 poems each, with prosodic annotations from Russian National Corpus
 - **Italian**: 52 poets, 200 poems each, spanning seven centuries (1200-1900)
 
-**Embeddings (6 models):**
+**Embeddings:** six models are on Zenodo —
 - Gemini text-embedding-001 (3,072 dimensions) — API
 - OpenAI text-embedding-3-large (3,072 dimensions) — API
 - Voyage-3-large (1,024 dimensions) — API
 - Qwen3-Embedding-8B (4,096 dimensions) — Local
 - E5-large multilingual (1,024 dimensions) — Local
 - BGE-M3 (1,024 dimensions) — Local, Russian only
+
+Figure 1 additionally shows Qwen3-Embedding-0.6B, whose embeddings are not
+part of the release; that bar cannot be recomputed.
 
 ---
 
@@ -133,10 +136,11 @@ running anything.
 | §Perturbation analysis | `exp10_embedding_structure/run_ablation.py` | 2 s |
 | Table 10 — bidirectional residuals | `exp8_combined_features/analyze_residualization.py` | 5 min |
 | §Error overlap | `exp4_multiclass/analyze_errors_comparison.py` | 20 min |
-| Table 11 — error by length | `exp2_binary_pairs/analyze_method_differences.py` | 15 min |
+| Table 11 — error by length | `exp2_binary_pairs/analyze_method_differences.py` *(same run as above)* | — |
 | §Linear vs kernel | `exp7_waterfall/test_nonlinear_tiers.py` | 20 min |
 
-Only Figure 1 and the two figures below it need `python download_data.py --all`.
+`python download_data.py --all` is needed only for Figure 1, the two
+combined-comparison figures, and the optional Qwen3-8B columns of Table 5.
 Everything else runs on the default download.
 
 ---
@@ -153,6 +157,8 @@ python experiments/exp8a_multi_model_comparison/visualize_model_comparison.py
 ```
 
 **Expected** — `figures/embedding_model_comparison.png`
+
+![Model Comparison](figures/embedding_model_comparison.png)
 
 | Model | Russian | Italian |
 |-------|---------|---------|
@@ -219,9 +225,12 @@ python experiments/exp8a_multi_model_comparison/visualize_italian.py  # Italian
 
 Needs `exp8a/run.py` and `run_italian.py` from Figure 1 above.
 
-**Expected** — `figures/combined_comparison.png`, `combined_comparison_italian.png`.
-Stylometry baseline 59.4% (Russian) and 80.4% (Italian); Gemini combined 71.2%
-and 82.2%.
+**Expected** — stylometry baseline 59.4% (Russian) and 80.4% (Italian);
+Gemini combined 71.2% and 82.2%.
+
+![Russian Comparison](figures/combined_comparison.png)
+
+![Italian Comparison](figures/combined_comparison_italian.png)
 
 #### §Binary Attribution
 
@@ -263,8 +272,10 @@ python experiments/exp2_binary_pairs/analyze_method_differences_italian.py   # 2
 python experiments/exp2_binary_pairs/plot_binary_error_by_length.py
 ```
 
-**Expected** — `figures/binary_fig2_error_by_length.png`, both panels; overall
-93.8% / 94.5% (Russian) and 96.1% / 98.5% (Italian).
+**Expected** — both panels; overall 93.8% / 94.5% (Russian) and
+96.1% / 98.5% (Italian).
+
+![Error by Length](figures/binary_fig2_error_by_length.png)
 
 ---
 
@@ -304,6 +315,10 @@ if you want figures from your own run.
 
 **Expected** — `figures/waterfall_figure.png` (Gemini) and
 `waterfall_figure_qwen.png` (Qwen3-8B), each with a Russian and an Italian panel.
+
+![Waterfall Residualization, Gemini](figures/waterfall_figure.png)
+
+![Waterfall Residualization, Qwen3-8B](figures/waterfall_figure_qwen.png)
 
 #### §Permutation test — is the residual above chance?
 
@@ -458,9 +473,9 @@ linearly accessible.
 
 #### Table 11 — Binary error rates by text length
 
-```bash
-python experiments/exp2_binary_pairs/analyze_method_differences.py
-```
+Already produced by the §Binary Attribution run above — this table and Figure 4
+come from the same `method_differences_gemini.json`, so there is no need to run
+it again.
 
 **Expected** (Russian, Gemini)
 
@@ -479,46 +494,50 @@ python experiments/exp2_binary_pairs/analyze_method_differences.py
 
 ```
 .
-├── data/                 # Downloaded from Zenodo (see download_data.py)
-│   ├── russian/          # Russian poetry corpus (5,800 poems)
-│   │   ├── embeddings_gemini.npy     # 68 MB
-│   │   ├── embeddings_openai.npy     # 136 MB
-│   │   ├── embeddings_voyage.npy     # 23 MB
-│   │   ├── embeddings_qwen8b.npy     # 91 MB
-│   │   ├── embeddings_e5-large.npy   # 23 MB
-│   │   ├── embeddings_bge-m3.npy     # 23 MB
-│   │   ├── poems.json
-│   │   └── linguistic_features.json
-│   └── italian/          # Italian poetry corpus (10,400 poems)
-│       ├── embeddings_gemini.npy     # 122 MB
-│       ├── embeddings_openai.npy     # 122 MB
-│       ├── embeddings_voyage.npy     # 41 MB
-│       ├── embeddings_qwen8b.npy     # 163 MB
-│       ├── embeddings_e5-large.npy   # 41 MB
-│       ├── poems.json
-│       └── linguistic_features.json
+├── data/                 # small files are committed; large ones come from Zenodo
+│   ├── README.md                     # data documentation
+│   ├── russian/          # 5,800 poems by 29 poets
+│   │   ├── dataset_metadata.json     # author list, parameters      [committed]
+│   │   ├── labels.npy                # author index per poem        [committed]
+│   │   ├── prosody.json              # RNC prosodic annotations     [committed]
+│   │   ├── poems.json                # texts                        [Zenodo]
+│   │   ├── linguistic_features.json  # POS, morphology, deprels     [Zenodo]
+│   │   └── embeddings_*.npy          # gemini, openai, voyage,      [Zenodo]
+│   │                                 #   qwen8b, e5-large, bge-m3
+│   └── italian/          # 10,400 poems by 52 poets
+│       ├── dataset_metadata.json                                   [committed]
+│       ├── labels.npy                                              [committed]
+│       ├── poems.json                                              [Zenodo]
+│       ├── linguistic_features.json                                [Zenodo]
+│       └── embeddings_*.npy          # gemini, openai, voyage,      [Zenodo]
+│                                     #   qwen8b, e5-large
 │
 ├── src/                  # Core library
-│   ├── data_loader.py    # Data loading utilities
-│   ├── features.py       # Feature extraction (175 features)
+│   ├── data_loader.py    # loads a corpus, merges prosody + linguistic features
+│   ├── features.py       # feature extraction across the six tiers
 │   ├── statistical_tests.py
 │   └── ...
 │
 ├── experiments/          # Experiment scripts + pre-computed results
-│   ├── exp0_stylometry_baseline/   # Stylometry baselines
-│   ├── exp2_binary_pairs/          # Pairwise attribution, error by length
-│   ├── exp4_multiclass/            # Multiclass attribution, text length
-│   ├── exp5_interpretability/      # Classification probes, cross-topic
-│   ├── exp7_waterfall/             # Residualization waterfall, continuous
-│   │                               #   probes, frequency bands
-│   ├── exp8_combined_features/     # Combined features, bidirectional
-│   ├── exp8a_multi_model_comparison/  # Embedding model comparison
-│   └── exp10_embedding_structure/  # Ablation / perturbation analysis
+│   ├── exp0_stylometry_baseline/      # Table 2
+│   ├── exp2_binary_pairs/             # binary attribution, error by length
+│   ├── exp4_multiclass/               # multiclass, text length, error overlap
+│   ├── exp5_interpretability/         # classification probes, cross-topic
+│   ├── exp7_waterfall/                # waterfall, continuous probes,
+│   │                                  #   frequency bands, permutation test
+│   ├── exp8_combined_features/        # combined features, bidirectional
+│   ├── exp8a_multi_model_comparison/  # model comparison + its figures
+│   └── exp10_embedding_structure/     # perturbation analysis
 │
-├── figures/              # Publication figures
+├── figures/              # the six paper figures, each regenerated from a
+│                         #   results file (methods-euler-final.png is a
+│                         #   hand-drawn schematic, not generated)
 │
-├── download_data.py      # Download data from Zenodo
+├── download_data.py      # fetch + verify the Zenodo data
+├── prepare_for_submission.py  # split large files out for the Zenodo deposit
 ├── requirements.txt      # Python dependencies
+├── CITATION.cff          # citation metadata
+├── .zenodo.json          # Zenodo deposit metadata
 └── LICENSE               # MIT License
 ```
 
